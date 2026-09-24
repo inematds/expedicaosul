@@ -1,0 +1,6 @@
+{"legs": ["osrm_A.json", "FERRY", "osrm_B.json"], "ferry_reverse": false,
+ "border": {"bbox": [-31.05, -55.75, -30.75, -55.35], "km": [1900, 2330], "from": "UY", "to": "BR"},
+ "stops": [["sma","San Martín de los Andes","stop","start"],["bb","Bahía Blanca","stop",null],["moreno","Moreno","stop",null],
+           ["ferry_ba","Colonia Express","stop","ferry0"],["ferry_col","Colonia del Sacramento","stop","ferry1"],
+           ["livramento","Sant'Ana do Livramento","stop",null],["poa","Porto Alegre","stop",null],["canela","Canela","stop","end"]],
+ "passages": [["riocolorado","Río Colorado",-64.0856,-38.9906],["azul","Azul",-59.8584,-36.7769],["pasotoros","Paso de los Toros",-56.5192,-32.8114],["saogabriel","São Gabriel",-54.3217,-30.3364]]}

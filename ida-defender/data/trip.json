@@ -1,0 +1,104 @@
+{
+ "legs": [
+  "osrm_A.json",
+  "FERRY",
+  "osrm_B.json"
+ ],
+ "ferry_reverse": true,
+ "border": {
+  "bbox": [
+   -33.85,
+   -53.65,
+   -33.55,
+   -53.25
+  ],
+  "km": [
+   520,
+   720
+  ],
+  "from": "BR",
+  "to": "UY"
+ },
+ "stops": [
+  [
+   "canela",
+   "Canela",
+   "stop",
+   "start"
+  ],
+  [
+   "chui",
+   "Chuí",
+   "stop",
+   null
+  ],
+  [
+   "lapaloma",
+   "La Paloma",
+   "stop",
+   null
+  ],
+  [
+   "garzon",
+   "Pueblo Garzón",
+   "stop",
+   null
+  ],
+  [
+   "pde",
+   "Punta del Este",
+   "stop",
+   null
+  ],
+  [
+   "sancarlos",
+   "San Carlos",
+   "stop",
+   null
+  ],
+  [
+   "ferry_col",
+   "Colonia del Sacramento",
+   "stop",
+   "ferry0"
+  ],
+  [
+   "ferry_ba",
+   "Colonia Express · Buenos Aires",
+   "stop",
+   "ferry1"
+  ],
+  [
+   "moreno",
+   "Moreno",
+   "stop",
+   null
+  ],
+  [
+   "sma",
+   "San Martín de los Andes",
+   "stop",
+   "end"
+  ]
+ ],
+ "passages": [
+  [
+   "taim",
+   "Taim",
+   -52.549873,
+   -32.6880395
+  ],
+  [
+   "santarosa",
+   "Santa Rosa",
+   -64.2905765,
+   -36.6203503
+  ],
+  [
+   "veinticinco",
+   "25 de Mayo",
+   -67.7176368,
+   -37.7707789
+  ]
+ ]
+}

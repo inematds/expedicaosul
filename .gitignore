@@ -1,0 +1,18 @@
+# artefatos pesados (regeneráveis pelos scripts)
+**/renders/
+**/snapshots/
+**/assets/map/
+**/data/tiles/
+**/data/photos_cand*/
+**/data/qa/
+**/data/cars_raw/
+**/data/ferry_raw/
+**/data/ferry_cut/
+**/data/*_osm.json
+**/data/ne_boundaries.json
+**/data/overpass_pois.json
+**/data/__pycache__/
+**/.hyperframes/
+node_modules/
+*.log
+stats_tokens.json

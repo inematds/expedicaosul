@@ -1,0 +1,63 @@
+/* Configuração da viagem: A IDA (Canela → San Martín de los Andes), só a Defender 110.
+   Rota = link do usuário percorrido no sentido Canela → SMA (Chuí, litoral uruguaio, balsa Colonia → Buenos Aires, Moreno, RN 5).
+   Trilha: groove entra em 9,2 s; respiro 56–63 s (balsa); retorno em 64,25 s; fade 90–95,7 s.
+   Fatos: Wikipedia (data/facts), OSM (balsa, fronteira), SRTM, OSRM. */
+window.TRIP = {
+  dur: 95.7,
+  title: { k: "EXPEDIÇÃO SUL · A IDA", lines: ["Da Serra", "aos Andes", "<span class=\"arrow\">▸</span> 2.882 km"] },
+  brandSub: "BR ▸ UY ▸ AR",
+  intro: {
+    vehicle: "DEFENDER 110", sub: "LAND ROVER · BRANCA",
+    chips: [["2.882", "KM", "DE ESTRADA E ÁGUA"], ["3", "PAÍSES", "BR · UY · AR"], ["1", "BALSA", "RÍO DE LA PLATA"]],
+  },
+  schedule: [
+    { id: "canela", dep: 9.2, dwellKm: 40 },
+    { id: "chui", arr: 20.0, dep: 21.2, dwellKm: 40, at: "border" },
+    { id: "lapaloma", arr: 25.4, dep: 26.4, dwellKm: 36 },
+    { id: "garzon", arr: 29.4, dep: 30.2, dwellKm: 32 },
+    { id: "pde", arr: 33.4, dep: 34.6, dwellKm: 30 },
+    { id: "sancarlos", arr: 37.4, dep: 38.4, dwellKm: 32 },
+    { id: "ferry_col", arr: 50.0, dep: 56.4, dwellKm: 70 },
+    { id: "ferry_ba", arr: 64.25, dep: 65.4, dwellKm: 60 },
+    { id: "moreno", arr: 68.4, dep: 69.4, dwellKm: 40 },
+    { id: "sma", arr: 83.0, dwellKm: 42 },
+  ],
+  ferry: { dep: 56.4, arr: 64.25 },
+  outro: { t0: 85.0, t1: 87.6 },
+  ov: { hfit: 1.75, shift: 0.05 },
+  ovLabels: ["canela", "chui", "pde", "ferry_col", "ferry_ba", "sma"],
+  countries: [["BR", "BRASIL"], ["UY", "URUGUAI"], ["AR", "ARGENTINA"]],
+  countrySwitch: ["border", "ferry"],
+  stamps: [
+    { t: 20.0, s1: "BRASIL ▸ URUGUAI", s2: "CHUÍ · CHUY", s3: "KM 631 · FRONTEIRA" },
+    { t: 64.25, s1: "URUGUAI ▸ ARGENTINA", s2: "BUENOS AIRES", s3: "KM 1.334 · FIM DA BALSA" },
+  ],
+  mapLabels: [
+    ["ARGENTINA", -66.3, -34.6, "country", 46],
+    ["URUGUAI", -55.9, -32.4, "country", 40],
+    ["BRASIL", -54.3, -28.6, "country", 40],
+    ["CHILE", -71.9, -36.3, "country", 34],
+    ["OCEANO ATLÂNTICO", -54.5, -36.4, "sea", 30],
+    ["RÍO DE LA PLATA", -56.3, -35.55, "sea", 20],
+  ],
+  cards: [
+    { id: "canela", s: 7.2, e: 13.4, img: "canela", inset: "canela2", km: "0", kick: "KM 0 · SERRA GAÚCHA · BRASIL", ttl: "Canela", body: "Começa a ida: <em>2.882 km</em> até San Martín de los Andes, pelo litoral uruguaio e pelo pampa." },
+    { id: "taim", s: 13.4, e: 20.0, img: "taim", inset: "taim2", km: "491", kick: "KM 491 · BR-471 · PASSAGEM", ttl: "Taim", body: "A BR-471 cruza a Estação Ecológica do Taim, entre o Atlântico e a Lagoa Mirim: <em>250 espécies de aves</em>." },
+    { id: "chui", s: 20.0, e: 25.4, img: "chui", km: "631", kick: "KM 631 · FRONTEIRA BRASIL–URUGUAI", ttl: "Chuí · Chuy", body: "Uma avenida separa os países: <em>Avenida Uruguai</em> de um lado, <em>Avenida Brasil</em> do outro." },
+    { id: "lapaloma", s: 25.4, e: 29.4, img: "lapaloma", inset: "lapaloma2", km: "790", kick: "KM 790 · ROCHA · URUGUAI", ttl: "La Paloma", body: "No Cabo Santa María: de longe, rochas e espuma lembravam a <em>silhueta de uma pomba</em>." },
+    { id: "garzon", s: 29.4, e: 33.4, img: "garzon", km: "862", kick: "KM 862 · MALDONADO · URUGUAI", ttl: "Pueblo Garzón", body: "A antiga estação de trem de um povoado de <em>198 habitantes</em> (2011)." },
+    { id: "pde", s: 33.4, e: 37.4, img: "pde", inset: "pde2", km: "927", kick: "KM 927 · MALDONADO · URUGUAI", ttl: "Punta del Este", body: "A escultura <em>La Mano</em>. 18.200 moradores o ano todo — até 450 mil na alta temporada." },
+    { id: "sancarlos", s: 37.4, e: 43.0, img: "sancarlos", km: "968", kick: "KM 968 · MALDONADO · URUGUAI", ttl: "San Carlos", body: "Povoada no século XVIII por <em>famílias açorianas</em> vindas do Rio Grande do Sul." },
+    { id: "uruguai", s: 43.0, e: 50.0, data: { big: "652", unit: "KM", lab1: "CHUÍ ▸ COLONIA", lab2: "DO ATLÂNTICO AO PRATA", k0: 631.2, k1: 1282.8, ax0: "CHUÍ · ATLÂNTICO", ax1: "COLONIA · RÍO DE LA PLATA" }, kick: "RUTA 9 · RUTA 1 · URUGUAI", ttl: "O Uruguai inteiro", body: "Do Atlântico, no Chuí, ao Río de la Plata, em Colonia: o país atravessado de <em>leste a oeste</em>." },
+    { id: "ferry_col", s: 50.0, e: 56.4, img: "colonia", inset: "colonia2", km: "1.283", kick: "KM 1.283 · URUGUAI · EMBARQUE", ttl: "Colonia del Sacramento", body: "Fundada por portugueses em 1680. Daqui, a Defender embarca: <em>51 km de balsa</em> até Buenos Aires (1h15)." },
+    { id: "rioplata", s: 56.4, e: 64.25, img: "rioplata", km: "1.308", kick: "EM PLENO RIO · BALSA", ttl: "Río de la Plata", body: "Nasce da união dos rios <em>Paraná e Uruguai</em> e deságua no Atlântico." },
+    { id: "ferry_ba", s: 64.25, e: 68.4, img: "coloniaexpress", km: "1.334", kick: "KM 1.334 · PUERTO MADERO SUR · ARGENTINA", ttl: "Buenos Aires", body: "Desembarque da <em>Colonia Express</em>, que liga as duas margens desde 2007." },
+    { id: "moreno", s: 68.4, e: 72.4, img: "moreno", km: "1.378", kick: "KM 1.378 · GRANDE BUENOS AIRES", ttl: "Moreno", body: "Oeste da Grande Buenos Aires, <em>576.632 habitantes</em> (censo 2022). O povoado nasceu com a ferrovia, em 1860." },
+    { id: "santarosa", s: 72.4, e: 77.0, img: "santarosa", km: "1.949", kick: "KM 1.949 · RN 5 · PASSAGEM", ttl: "Santa Rosa", body: "Capital de La Pampa, fundada em 1892 como <em>Santa Rosa del Toay</em>." },
+    { id: "veinticinco", s: 77.0, e: 83.0, img: "veinticinco", inset: "veinticinco2", km: "2.362", kick: "KM 2.362 · RÍO COLORADO · PASSAGEM", ttl: "Olá, Patagônia", body: "25 de Mayo, às margens do <em>Río Colorado</em> — o limite norte tradicional da Patagônia." },
+    { id: "sma", s: 83.0, e: 87.6, img: "sma", inset: "lacar", km: "2.882", kick: "KM 2.882 · NEUQUÉN · CHEGADA", ttl: "San Martín de los Andes", body: "Na margem leste do <em>Lago Lácar</em>, ao pé da cordilheira. Fim da ida." },
+    { id: "summary", s: 87.6, e: 91.6, stats: [["2.882", "KM", "DE ESTRADA E BALSA"], ["3", "PAÍSES", "BR ▸ UY ▸ AR"], ["51", "KM", "DE BALSA · 1H15"], ["≈39", "H", "AO VOLANTE (EST.)"]], kick: "DIÁRIO DE BORDO · RESUMO", ttl: "Rumo aos Andes", body: "Canela ▸ San Martín de los Andes, de <em>Defender 110</em>, pelo litoral uruguaio e pelo pampa." },
+  ],
+  endTitle: { k: "A IDA · 2.882 KM", h: "Serra <span class=\"accent\">▸</span> Andes" },
+  credits: { s: 91.6, photos: "Rosanetur (CC BY 2.0) · Fernando Schultz Aldado (dom. público) · Giácomo Luiz Mancini (CC BY-SA 4.0) · John Seb Barber (CC BY 2.0) · Granjuanlll (CC BY-SA 3.0) · Jimmy Baikovicius (CC BY-SA 2.0) · Eduardo.terian (CC BY-SA 3.0) · María Cecilia (CC0) · mriaco (CC BY 3.0) · NaBUru38 (CC BY-SA 4.0) · Diego Delso (CC BY-SA 3.0) · bullit (CC BY 3.0) · Roxyuru (CC BY-SA 3.0) · NASA JSC Earth Sciences (dom. público) · Walteriot (CC BY-SA 3.0) · Juanedc (CC BY 2.0) · Jmmuguerza (CC BY-SA 4.0) · Silvio omar (CC BY-SA 4.0) · Albasmalko (dom. público) · Marco Antonio Correa Flores (CC BY-SA 4.0)" },
+};

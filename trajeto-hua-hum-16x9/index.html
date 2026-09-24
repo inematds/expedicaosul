@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Trajeto Hua Hum 16:9</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script src="assets/route.js"></script>
+    <script src="assets/border_wide.js"></script>
+    <style>
+      :root {
+        --bg: #0c1310;
+        --panel: #131c18;
+        --fg: #f0e9da;
+        --muted: #aab4a9;
+        --accent: #f4a62a;
+        --accent-deep: #c97a0e;
+        --water: #9fd0dc;
+        --display: "League Gothic", "Oswald", sans-serif;
+        --mono: "IBM Plex Mono", "JetBrains Mono", monospace;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+      #root { position: relative; width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); font-family: var(--mono); }
+
+      /* fundo ambiente */
+      .bg-glow { position: absolute; width: 1300px; height: 1300px; left: 920px; top: -80px; border-radius: 50%;
+        background: radial-gradient(closest-side, rgba(244, 166, 42, 0.16), rgba(244, 166, 42, 0) 70%); }
+      .bg-ghost { position: absolute; left: 30px; top: 1180px; font-family: var(--display); font-size: 420px; line-height: 1;
+        color: rgba(240, 233, 218, 0.045); letter-spacing: 0.02em; white-space: nowrap; }
+
+      /* barra superior */
+      #topbar { position: absolute; left: 40px; right: 40px; top: 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+      #brand { display: flex; align-items: center; gap: 18px; }
+      #brand .dot { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 18px rgba(244,166,42,.8); }
+      #brand .name { font-weight: 700; font-size: 26px; letter-spacing: 0.22em; color: var(--accent); }
+      #brand .sub { font-size: 22px; letter-spacing: 0.14em; color: var(--muted); }
+      #coords { font-size: 24px; letter-spacing: 0.08em; color: var(--muted); text-align: right; }
+
+      /* quadro do mapa */
+      #frame { position: absolute; left: 40px; top: 100px; width: 1160px; height: 940px; overflow: hidden; border-radius: 30px; background: #10201a; }
+      #world { position: absolute; inset: 0; }
+      .layer { position: absolute; left: 0; top: 0; transform-origin: 0 0; display: block; max-width: none; }
+      #L-mid, #L-det { -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent);
+        -webkit-mask-composite: source-in; mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 5%, #000 95%, transparent); mask-composite: intersect; }
+      #ov { position: absolute; inset: 0; width: 1160px; height: 940px; }
+      #labels, #pins, #cars { position: absolute; inset: 0; }
+      .lbl { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--display); text-transform: uppercase; letter-spacing: 0.32em;
+        color: rgba(190, 228, 238, 0.92); text-shadow: 0 2px 10px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9); }
+      .lbl.country { color: rgba(240, 233, 218, 0.95); letter-spacing: 0.5em; }
+      .lbl.volcano { color: rgba(240, 233, 218, 0.9); letter-spacing: 0.22em; }
+      .lbl.city { color: var(--fg); letter-spacing: 0.12em; font-family: var(--mono); font-weight: 700; }
+      .pin { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+      .pin .ring { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; border: 4px solid var(--fg); background: rgba(12,19,16,.75); box-shadow: 0 0 0 3px rgba(0,0,0,.35); }
+      .pin .ping { position: absolute; left: -11px; top: -11px; width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--accent); opacity: 0; }
+      .pin .plabel { position: absolute; left: 20px; top: -21px; white-space: nowrap; font-size: 22px; font-weight: 700; letter-spacing: 0.06em; padding: 6px 12px 6px 12px;
+        background: rgba(12,19,16,.86); border: 2px solid rgba(240,233,218,.22); border-radius: 10px; color: var(--fg); }
+      .pin .plabel b { color: var(--accent); font-weight: 700; margin-right: 10px; }
+      .pin .plabel .ns { display: none; }
+      .pin.ov .plabel .nl { display: none; }
+      .pin.ov .plabel .ns { display: inline; }
+      .car { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+      .car .glow { position: absolute; left: -46px; top: -46px; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(closest-side, rgba(244,166,42,.55), rgba(244,166,42,0)); }
+      .car .body { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+      .car .body .shadow { position: absolute; left: -17px; top: -30px; width: 34px; height: 62px; border-radius: 12px; background: rgba(0,0,0,.55); filter: blur(5px); transform: translate(5px, 6px); }
+      .car .body img { position: absolute; display: block; }
+      .car .tag { position: absolute; left: 0; top: 0; white-space: nowrap; font-size: 20px; font-weight: 700; letter-spacing: 0.1em; padding: 6px 12px;
+        border-radius: 8px; background: var(--fg); color: #16201b; }
+      .car .tag i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: 0; }
+
+      /* HUD */
+      .hud { position: absolute; }
+      #scrim-top { position: absolute; left: 0; top: 0; width: 1160px; height: 300px; background: linear-gradient(to bottom, rgba(8,13,11,.78), rgba(8,13,11,0)); }
+      #scrim-bot { position: absolute; left: 0; bottom: 0; width: 1160px; height: 190px; background: linear-gradient(to top, rgba(8,13,11,.78), rgba(8,13,11,0)); }
+      #vignette { position: absolute; inset: 0; box-shadow: inset 0 0 160px rgba(0,0,0,.55); border-radius: 30px; }
+      #frame-edge { position: absolute; inset: 0; border: 2px solid rgba(240,233,218,.18); border-radius: 30px; }
+      .tick { position: absolute; width: 34px; height: 34px; border-color: rgba(240,233,218,.55); border-style: solid; }
+      #hud-km { left: 38px; top: 30px; }
+      .hud .cap { font-size: 20px; letter-spacing: 0.24em; color: var(--muted); }
+      #km-val { font-family: var(--display); font-size: 112px; line-height: 1.05; margin-top: 8px; color: var(--fg); letter-spacing: 0.01em; }
+      #km-val small { font-size: 44px; color: var(--muted); margin-left: 8px; }
+      #hud-alt { right: 38px; top: 30px; text-align: right; }
+      #alt-val { font-family: var(--display); font-size: 72px; line-height: 1.1; margin-top: 8px; color: var(--fg); }
+      #alt-val small { font-size: 34px; color: var(--muted); margin-left: 6px; }
+      #hud-country { right: 34px; bottom: 30px; display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-radius: 12px; background: rgba(12,19,16,.82); border: 2px solid rgba(240,233,218,.2); }
+      #country-txt { font-size: 22px; font-weight: 700; letter-spacing: 0.14em; }
+      #road-txt { font-size: 20px; color: var(--accent); letter-spacing: 0.12em; }
+      .flag { width: 48px; height: 32px; border-radius: 4px; overflow: hidden; position: relative; box-shadow: 0 0 0 2px rgba(0,0,0,.35); }
+      .flag.ar { background: linear-gradient(to bottom, #74acdf 0 33.3%, #fff 33.3% 66.6%, #74acdf 66.6%); }
+      .flag.ar::after { content: ""; position: absolute; left: 19px; top: 11px; width: 10px; height: 10px; border-radius: 50%; background: #f6b40e; }
+      .flag.cl { background: linear-gradient(to bottom, #fff 0 50%, #d52b1e 50%); }
+      .flag.cl::before { content: ""; position: absolute; left: 0; top: 0; width: 16px; height: 16px; background: #0039a6; }
+      .flag.cl::after { content: ""; position: absolute; left: 5px; top: 5px; width: 6px; height: 6px; background: #fff; transform: rotate(45deg); }
+      #flagbox { position: relative; width: 48px; height: 32px; }
+      #flagbox .flag { position: absolute; left: 0; top: 0; }
+      #hud-scale { left: 38px; bottom: 34px; display: flex; align-items: flex-end; gap: 18px; }
+      #scale-bar { height: 12px; border: 3px solid var(--fg); border-top: none; width: 100px; }
+      #scale-txt { font-size: 20px; letter-spacing: 0.1em; }
+      #north { width: 34px; height: 50px; }
+
+      /* título de abertura (dentro do quadro) */
+      #intro-title { position: absolute; left: 38px; top: 32px; width: 900px; }
+      #intro-title .k { font-size: 22px; letter-spacing: 0.26em; color: var(--accent); font-weight: 700; }
+      #intro-title h1 { font-family: var(--display); font-weight: 400; font-size: 118px; line-height: 0.92; letter-spacing: 0.005em; margin-top: 14px; text-transform: uppercase; }
+      #intro-title h1 .arrow { color: var(--accent); }
+      .ln { display: block; overflow: hidden; }
+      .ln > span { display: block; }
+
+      /* carimbo de fronteira */
+      #stamp { position: absolute; left: 270px; top: 320px; width: 620px; height: 300px; }
+      #stamp .in { width: 100%; height: 100%; border: 8px solid #e8483a; border-radius: 22px; color: #e8483a; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: rgba(20, 8, 6, 0.42); box-shadow: 0 0 0 4px rgba(232,72,58,.35) inset; }
+      #stamp .s1 { font-size: 24px; letter-spacing: 0.3em; font-weight: 700; }
+      #stamp .s2 { font-family: var(--display); font-size: 110px; line-height: 1; letter-spacing: 0.04em; }
+      #stamp .s3 { font-size: 26px; letter-spacing: 0.18em; font-weight: 700; }
+
+      #end-title { position: absolute; left: 38px; top: 34px; width: 920px; }
+      #end-title .k { font-size: 22px; letter-spacing: 0.26em; color: var(--accent); font-weight: 700; }
+      #end-title h1 { font-family: var(--display); font-weight: 400; font-size: 116px; line-height: 1.05; margin-top: 14px; white-space: nowrap; }
+      #dim { position: absolute; inset: 0; background: rgba(8, 13, 11, 0.55); opacity: 0; }
+
+      /* trilho de altimetria */
+      #rail { position: absolute; left: 1240px; top: 100px; width: 640px; height: 110px; }
+      #rail svg { position: absolute; left: 0; top: 0; }
+      #rail-cap { position: absolute; left: 0; top: -2px; font-size: 18px; letter-spacing: 0.22em; color: var(--muted); }
+
+      /* painel inferior: cards do diário */
+      .card { position: absolute; left: 1240px; top: 236px; width: 640px; height: 804px; }
+      .card .inner { position: absolute; inset: 0; }
+      .ph { position: absolute; left: 0; top: 0; width: 640px; height: 360px; border-radius: 22px; overflow: hidden; background: #1b2621; }
+      .ph img.main { position: absolute; left: 0; top: 0; width: 640px; height: 360px; object-fit: cover; display: block; transform-origin: 50% 50%; }
+      .ph .shade { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8,13,11,.45), rgba(8,13,11,0) 45%); }
+      .ph .kmbadge { position: absolute; right: 18px; top: 18px; font-family: var(--display); font-size: 54px; line-height: 1; padding: 8px 16px 6px; border-radius: 12px; background: var(--accent); color: #1a1206; }
+      .inset { position: absolute; right: 18px; top: 206px; width: 240px; height: 160px; border: 8px solid var(--fg); border-radius: 6px; overflow: hidden; box-shadow: 0 18px 40px rgba(0,0,0,.55); background: #222; }
+      .inset img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .kick { position: absolute; left: 0; top: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.14em; color: var(--accent); white-space: nowrap; }
+      .txt { position: absolute; left: 0; top: 388px; width: 640px; display: flex; flex-direction: column; gap: 14px; }
+      .txt .kick, .txt .ttl, .txt .body { position: relative; top: auto; left: auto; }
+      .ttl { position: absolute; left: 0; top: 410px; width: 640px; font-family: var(--display); font-weight: 400; font-size: 96px; line-height: 0.98; text-transform: uppercase; letter-spacing: 0.005em; }
+      .ttl .w { display: inline-block; overflow: hidden; vertical-align: top; margin-right: 0.18em; }
+      .ttl .w > span { display: inline-block; }
+      .body { position: absolute; left: 0; top: 528px; width: 630px; font-size: 27px; line-height: 1.4; color: var(--fg); }
+      .body em { font-style: normal; color: var(--accent); }
+
+      /* card de dados (CH-203) */
+      .databox { position: absolute; left: 0; top: 0; width: 640px; height: 360px; border-radius: 22px; background: #16211c; border: 2px solid rgba(240,233,218,.14); overflow: hidden; }
+      .databox .big { position: absolute; left: 30px; top: 26px; font-family: var(--display); font-size: 120px; line-height: 0.95; }
+      .databox .big small { font-size: 60px; color: var(--muted); margin-left: 10px; }
+      .databox .lab { position: absolute; left: 330px; top: 50px; font-size: 20px; letter-spacing: 0.14em; color: var(--muted); }
+      .databox .ax { position: absolute; top: 322px; font-size: 18px; color: var(--muted); letter-spacing: 0.06em; }
+      .databox svg { position: absolute; left: 30px; top: 158px; width: 580px; height: 160px; }
+
+      /* resumo */
+      .stats { position: absolute; left: 0; top: 0; width: 640px; height: 360px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .stat { position: relative; border-radius: 20px; background: #16211c; border: 2px solid rgba(240,233,218,.14); padding: 22px 26px; overflow: hidden; }
+      .stat .v { font-family: var(--display); font-size: 84px; line-height: 0.95; color: var(--fg); }
+      .stat .v small { font-size: 38px; color: var(--accent); margin-left: 6px; }
+      .stat .l { font-size: 17px; letter-spacing: 0.04em; white-space: nowrap; color: var(--muted); margin-top: 6px; }
+
+      /* abertura: o comboio */
+      #convoy .cars { position: absolute; left: 0; top: 40px; width: 640px; height: 600px; }
+      .cv { position: absolute; left: 0; width: 640px; height: 290px; }
+      .cv .imgwrap { position: absolute; left: 0; top: 0; width: 640px; height: 180px; display: flex; align-items: flex-end; justify-content: center; }
+      .cv img { width: 380px; display: block; }
+      .cv .floor { position: absolute; left: 110px; top: 178px; width: 420px; height: 3px; background: linear-gradient(to right, rgba(240,233,218,0), rgba(240,233,218,.5), rgba(240,233,218,0)); }
+      .cv .nm { position: absolute; left: 0; top: 194px; width: 640px; text-align: center; font-family: var(--display); font-size: 56px; line-height: 1; }
+      .cv .sub { position: absolute; left: 0; top: 254px; width: 640px; text-align: center; font-size: 20px; letter-spacing: 0.2em; color: var(--muted); }
+      #convoy .chips { position: absolute; left: 0; top: 660px; width: 640px; display: flex; gap: 12px; }
+      .chip { flex: 1; border-radius: 16px; border: 2px solid rgba(240,233,218,.18); background: #16211c; padding: 14px 16px; }
+      .chip .v { font-family: var(--display); font-size: 58px; line-height: 1; }
+      .chip .v small { font-size: 34px; color: var(--accent); margin-left: 6px; }
+      .chip .l { font-size: 16px; letter-spacing: 0.1em; color: var(--muted); margin-top: 4px; }
+
+      /* créditos */
+      #credits .col { position: absolute; left: 0; top: 0; width: 640px; }
+      #credits h3 { font-family: var(--display); font-weight: 400; font-size: 64px; line-height: 1; }
+      #credits p { font-size: 23px; line-height: 1.5; color: var(--muted); margin-top: 14px; }
+      #credits p b { color: var(--fg); font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="74.4" data-width="1920" data-height="1080" data-fps="60">
+      <div class="bg-glow"></div>
+
+      <!-- ÁUDIO -->
+      <audio id="musA" src="assets/audio/music.mp3" data-start="0" data-duration="65.4" data-media-start="0" data-track-index="20" data-volume="0.9"
+        data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0},{"t":0.4,"v":1},{"t":64.8,"v":1},{"t":65.4,"v":0}]}]}'></audio>
+      <audio id="musB" src="assets/audio/music.mp3" data-start="64.8" data-duration="9.6" data-media-start="86.4" data-track-index="21" data-volume="0.9"
+        data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0},{"t":0.5,"v":1},{"t":9.6,"v":1}]}]}'></audio>
+      <audio id="sfx-w1" src="assets/audio/whoosh1.mp3" data-start="6.95" data-duration="2" data-track-index="22" data-volume="0.35"></audio>
+      <audio id="sfx-w2" src="assets/audio/whoosh2.mp3" data-start="11.8" data-duration="2" data-track-index="23" data-volume="0.3"></audio>
+      <audio id="sfx-w3" src="assets/audio/whoosh1.mp3" data-start="19.0" data-duration="2" data-track-index="22" data-volume="0.3"></audio>
+      <audio id="sfx-w4" src="assets/audio/whoosh2.mp3" data-start="26.2" data-duration="2" data-track-index="23" data-volume="0.3"></audio>
+      <audio id="sfx-w5" src="assets/audio/whoosh1.mp3" data-start="33.4" data-duration="2" data-track-index="22" data-volume="0.3"></audio>
+      <audio id="sfx-w6" src="assets/audio/whoosh2.mp3" data-start="38.2" data-duration="2" data-track-index="23" data-volume="0.3"></audio>
+      <audio id="sfx-stamp" src="assets/audio/stamp.mp3" data-start="43.15" data-duration="2" data-track-index="24" data-volume="0.85"></audio>
+      <audio id="sfx-w7" src="assets/audio/whoosh1.mp3" data-start="49.0" data-duration="2" data-track-index="22" data-volume="0.3"></audio>
+      <audio id="sfx-w8" src="assets/audio/whoosh2.mp3" data-start="55.0" data-duration="2" data-track-index="23" data-volume="0.3"></audio>
+      <audio id="sfx-w9" src="assets/audio/whoosh1.mp3" data-start="62.2" data-duration="2" data-track-index="22" data-volume="0.3"></audio>
+
+      <!-- BARRA SUPERIOR -->
+      <div id="topbar">
+        <div id="brand"><div class="dot"></div><div class="name">EXPEDIÇÃO SUL</div><div class="sub" id="brand-sub">ARGENTINA ▸ CHILE</div></div>
+        <div id="coords">40°09′S · 71°21′W</div>
+      </div>
+
+      <!-- QUADRO DO MAPA -->
+      <div id="frame">
+        <div id="world">
+          <img class="layer" id="L-wide" src="assets/map/wide_g.jpg" alt="" />
+          <img class="layer" id="L-mid" src="assets/map/mid_g.jpg" alt="" />
+          <img class="layer" id="L-det" src="assets/map/det_g.jpg" alt="" />
+        </div>
+        <svg id="ov" viewBox="0 0 1160 940">
+          <defs>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="5" /></filter>
+          </defs>
+          <g id="g-border">
+            <path id="border-wide" fill="none" stroke="rgba(240,233,218,0.85)" stroke-width="3" stroke-dasharray="10 9" />
+            <path id="border-det" fill="none" stroke="rgba(240,233,218,0.9)" stroke-width="3.5" stroke-dasharray="12 10" />
+          </g>
+          <polyline id="route-rest" fill="none" stroke="rgba(240,233,218,0.55)" stroke-width="3.5" stroke-dasharray="2 9" stroke-linecap="round" stroke-linejoin="round" />
+          <polyline id="route-glow" fill="none" stroke="rgba(244,166,42,0.55)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" />
+          <polyline id="route-core" fill="none" stroke="#f4a62a" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+          <polyline id="route-hi" fill="none" stroke="#ffe2a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <div id="scrim-top"></div>
+        <div id="scrim-bot"></div>
+        <div id="labels"></div>
+        <div id="pins"></div>
+        <div id="cars">
+          <div class="car" id="car-t">
+            <div class="glow"></div>
+            <div class="body" id="car-t-body"><div class="shadow"></div><img id="car-t-img" src="assets/cars/tucson_top.png" alt="" style="left:-14px;top:-29px;width:28px;height:59px" /></div>
+            <div class="tag" id="car-t-tag"><i style="background:#b9c0c6"></i>TUCSON</div>
+          </div>
+          <div class="car" id="car-d">
+            <div class="glow"></div>
+            <div class="body" id="car-d-body"><div class="shadow"></div><img id="car-d-img" src="assets/cars/defender_top.png" alt="" style="left:-14px;top:-30px;width:28px;height:60px" /></div>
+            <div class="tag" id="car-d-tag"><i style="background:#ffffff;box-shadow:0 0 0 2px #16201b inset"></i>DEFENDER 110</div>
+          </div>
+        </div>
+        <div id="dim"></div>
+
+        <div class="hud" id="hud-km"><div class="cap">QUILÔMETRO</div><div id="km-val">0,0<small>/ 54,3</small></div></div>
+        <div class="hud" id="hud-alt"><div class="cap">ALTITUDE</div><div id="alt-val">647<small>M</small></div></div>
+        <div class="hud" id="hud-scale">
+          <svg id="north" viewBox="0 0 34 50" data-layout-allow-overflow><path d="M17 2 L30 36 L17 28 L4 36 Z" fill="#f0e9da" /><path d="M17 2 L17 28 L4 36 Z" fill="#aab4a9" /><text x="17" y="46" font-size="11" text-anchor="middle" fill="#f0e9da" font-family="IBM Plex Mono" font-weight="700">N</text></svg>
+          <div><div id="scale-bar"></div><div id="scale-txt">2 KM</div></div>
+        </div>
+        <div class="hud" id="hud-country">
+          <div id="flagbox"><div class="flag ar" id="flag-ar"></div><div class="flag cl" id="flag-cl"></div></div>
+          <div><div id="country-txt">ARGENTINA</div><div id="road-txt">RUTA PROV. 48</div></div>
+        </div>
+
+        <div id="intro-title">
+          <div class="k" id="it-k">SAN MARTÍN DE LOS ANDES ▸ PIRIHUEICO</div>
+          <h1><span class="ln"><span id="it-1">A travessia</span></span><span class="ln"><span id="it-2">dos Andes</span></span><span class="ln"><span id="it-3"><span class="arrow">▸</span> Paso Hua Hum</span></span></h1>
+        </div>
+        <div id="stamp"><div class="in"><div class="s1">ARGENTINA ▸ CHILE</div><div class="s2">PASO HUA HUM</div><div class="s3">KM 43,7 · FRONTEIRA</div></div></div>
+        <div id="end-title"><div class="k">DE UM LAGO AO OUTRO</div><h1>Lácar <span style="color:var(--accent)">▸</span> Pirihueico</h1></div>
+
+        <div id="vignette"></div>
+        <div id="frame-edge"></div>
+        <div class="tick" style="left:16px;top:16px;border-width:3px 0 0 3px;border-top-left-radius:14px"></div>
+        <div class="tick" style="right:16px;top:16px;border-width:3px 3px 0 0;border-top-right-radius:14px"></div>
+        <div class="tick" style="left:16px;bottom:16px;border-width:0 0 3px 3px;border-bottom-left-radius:14px"></div>
+        <div class="tick" style="right:16px;bottom:16px;border-width:0 3px 3px 0;border-bottom-right-radius:14px"></div>
+      </div>
+
+      <!-- TRILHO DE ALTIMETRIA -->
+      <div id="rail">
+        <div id="rail-cap">PERFIL DE ALTITUDE · 604–1.038 M</div>
+        <svg width="640" height="110" viewBox="0 0 640 110" data-layout-allow-overflow>
+          <defs>
+            <linearGradient id="gFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4a62a" stop-opacity="0.75" /><stop offset="1" stop-color="#f4a62a" stop-opacity="0.08" /></linearGradient>
+            <clipPath id="railclip"><rect id="rail-rect" x="0" y="0" width="0" height="110" /></clipPath>
+          </defs>
+          <path id="prof-bg" fill="rgba(240,233,218,0.10)" stroke="rgba(240,233,218,0.35)" stroke-width="2" />
+          <g clip-path="url(#railclip)"><path id="prof-fg" fill="url(#gFill)" stroke="#f4a62a" stroke-width="3" /></g>
+          <line x1="0" y1="96" x2="640" y2="96" stroke="rgba(240,233,218,0.35)" stroke-width="2" />
+          <g id="rail-ticks"></g>
+          <line id="rail-border" y1="22" y2="96" stroke="rgba(240,233,218,0.8)" stroke-width="2" stroke-dasharray="4 4" />
+          <circle id="rail-t" r="7" cy="96" fill="#b9c0c6" stroke="#16201b" stroke-width="2" />
+          <circle id="rail-d" r="8" cy="96" fill="#ffffff" stroke="#f4a62a" stroke-width="3" />
+        </svg>
+      </div>
+
+      <!-- PAINEL: ABERTURA — O COMBOIO -->
+      <section class="card clip" id="convoy" data-start="0" data-duration="7.8" data-track-index="2">
+        <div class="inner">
+          <div class="kick" style="top:0">O COMBOIO</div>
+          <div class="cars">
+            <div class="cv" style="top:0"><div class="imgwrap"><img id="cv-t" src="assets/cars/tucson_side.png" alt="" /></div><div class="floor"></div><div class="nm">HYUNDAI TUCSON</div><div class="sub">HYUNDAI · SUV</div></div>
+            <div class="cv" style="top:300px"><div class="imgwrap"><img id="cv-d" src="assets/cars/defender_side.png" alt="" /></div><div class="floor"></div><div class="nm">DEFENDER 110</div><div class="sub">LAND ROVER · BRANCA</div></div>
+          </div>
+          <div class="chips">
+            <div class="chip"><div class="v">54,3<small>KM</small></div><div class="l">DE ESTRADA</div></div>
+            <div class="chip"><div class="v">1<small>PASSO</small></div><div class="l">FRONTEIRA AR · CL</div></div>
+            <div class="chip"><div class="v">≈70<small>MIN</small></div><div class="l">AO VOLANTE (EST.)</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARDS DO DIÁRIO (gerados pelo script a partir de CARDS) -->
+      <div id="cards"></div>
+      <div id="fadeout" style="position:absolute;inset:0;background:#050807;opacity:0;pointer-events:none"></div>
+    </div>
+
+    <script>
+      /* ===================== DADOS ===================== */
+      const R = window.ROUTE;
+      const TOTAL = R.total_km, STEP = R.step_km, PTS = R.pts;
+      const RW = 640;
+      const FW = 1160, FH = 940, PXKM = 136.77; // px (z14) por km em lat -40.1
+      const WP = Object.fromEntries(R.waypoints.map((w) => [w.id, w]));
+      const KB = R.km_border;
+      const fmt1 = (v) => v.toFixed(1).replace(".", ",");
+      const fmtInt = (v) => Math.round(v).toLocaleString("pt-BR");
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const lerp = (a, b, t) => a + (b - a) * t;
+      const smooth = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+      const eio = (u) => (u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2);
+      const eio3 = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
+      function world(lon, lat) {
+        const n = 256 * Math.pow(2, 14), s = Math.sin((lat * Math.PI) / 180);
+        return [((lon + 180) / 360) * n, (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * n];
+      }
+      function unworld(x, y) {
+        const n = 256 * Math.pow(2, 14);
+        return [(x / n) * 360 - 180, (Math.atan(Math.sinh(Math.PI * (1 - (2 * y) / n))) * 180) / Math.PI];
+      }
+      function posAt(km) {
+        const f = clamp(km, 0, TOTAL) / STEP, i = Math.min(PTS.length - 2, Math.floor(f)), u = f - i;
+        return [lerp(PTS[i][0], PTS[i + 1][0], u), lerp(PTS[i][1], PTS[i + 1][1], u)];
+      }
+      function headingAt(km) {
+        const a = posAt(km - 0.14), b = posAt(km + 0.14);
+        return Math.atan2(b[1] - a[1], b[0] - a[0]);
+      }
+      function eleAt(km) {
+        const E = R.elev, f = clamp(km, 0, E.km[E.km.length - 1]) / 0.25, i = Math.min(E.ele.length - 2, Math.floor(f));
+        return lerp(E.ele[i], E.ele[i + 1], f - i);
+      }
+
+      /* ===================== AGENDA (um relógio só) ===================== */
+      // [t0, t1, km0, km1] — chegadas caem em linhas de compasso (100 BPM → 2,4 s)
+      const P0 = 0.31;
+      const SEGS = [
+        [9.6, 12.0, P0, WP.lacar.km],
+        [13.2, 19.2, WP.lacar.km, WP.ripio.km],
+        [20.4, 26.4, WP.ripio.km, WP.yuco.km],
+        [27.6, 33.6, WP.yuco.km, WP.nonthue.km],
+        [34.8, 38.4, WP.nonthue.km, WP.huahum.km],
+        [39.6, 43.2, WP.huahum.km, KB],
+        [45.6, 55.2, KB, TOTAL],
+      ];
+      const ARRIVE = { sma: 7.2, lacar: 12.0, ripio: 19.2, yuco: 26.4, nonthue: 33.6, huahum: 38.4, border: 43.2, pirehueico: 55.2 };
+      function progress(t) {
+        let km = P0;
+        for (const [t0, t1, a, b] of SEGS) {
+          if (t < t0) return km;
+          if (t <= t1) return lerp(a, b, eio3((t - t0) / (t1 - t0)));
+          km = b;
+        }
+        return km;
+      }
+      function segInfo(t) {
+        for (const [t0, t1, a, b] of SEGS) if (t >= t0 && t <= t1) return { u: (t - t0) / (t1 - t0), km: b - a };
+        return null;
+      }
+      const S_DWELL = 1.3;
+      function driveCam(t) {
+        const P = progress(t), si = segInfo(t);
+        let S = S_DWELL, z = 0;
+        if (si) {
+          z = Math.pow(Math.sin(Math.PI * si.u), 1.3);
+          const sTrav = Math.max(0.52, 1.3 - 0.062 * si.km);
+          S = lerp(S_DWELL, sTrav, z);
+        }
+        const gap = 62 / (S * PXKM);
+        const ahead = z * 0.22 * (FW / S) / PXKM;
+        const c = posAt(clamp(P - gap / 2 + ahead, 0, TOTAL));
+        return { cx: c[0], cy: c[1], S };
+      }
+      // câmera da abertura e do fim
+      const CA = world(-71.70, -39.84), CB = world(-71.57, -39.90);
+      const SA = 0.040, SB = 0.05;
+      let minx = 1e12, maxx = -1e12, miny = 1e12, maxy = -1e12;
+      for (const p of PTS) { minx = Math.min(minx, p[0]); maxx = Math.max(maxx, p[0]); miny = Math.min(miny, p[1]); maxy = Math.max(maxy, p[1]); }
+      const SO = 0.95 * Math.min(FW / ((maxx - minx) * 1.2), FH / ((maxy - miny) * 2.6));
+      const CO = [(minx + maxx) / 2, (miny + maxy) / 2 - 130 / SO];
+      function zoomTo(a, b, e) {
+        // interpolação log de escala + zoom em torno do alvo
+        // o alvo desliza em espaço de tela até o centro enquanto a escala cresce (sem puxão no fim)
+        const S = Math.exp(lerp(Math.log(a.S), Math.log(b.S), e));
+        const k = (1 - eio(e)) * a.S / S;
+        return { cx: b.cx - (b.cx - a.cx) * k, cy: b.cy - (b.cy - a.cy) * k, S };
+      }
+      function zoomOut(a, b, e) {
+        const S = Math.exp(lerp(Math.log(a.S), Math.log(b.S), e));
+        const w = (1 / S - 1 / a.S) / (1 / b.S - 1 / a.S || 1);
+        return { cx: lerp(a.cx, b.cx, clamp(w, 0, 1)), cy: lerp(a.cy, b.cy, clamp(w, 0, 1)), S };
+      }
+      function camera(t) {
+        if (t < 7.2) {
+          const u = t / 7.2;
+          return { cx: lerp(CA[0], CB[0], eio(u)), cy: lerp(CA[1], CB[1], eio(u)), S: Math.exp(lerp(Math.log(SA), Math.log(SB), u)) };
+        }
+        if (t < 9.6) return zoomTo({ cx: CB[0], cy: CB[1], S: SB }, driveCam(9.6), eio3((t - 7.2) / 2.4));
+        if (t < 57.6) return driveCam(t);
+        const o = { cx: CO[0], cy: CO[1], S: SO };
+        if (t < 60.6) return zoomOut(driveCam(57.6), o, eio3((t - 57.6) / 3.0));
+        return { cx: CO[0], cy: CO[1], S: SO * (1 + 0.045 * eio((t - 60.6) / 13.8)) };
+      }
+
+      /* ===================== DOM: camadas, rótulos, pinos ===================== */
+      const LAY = R.layers;
+      const layers = [
+        { el: document.getElementById("L-wide"), m: LAY.wide, f: 16 },
+        { el: document.getElementById("L-mid"), m: LAY.mid, f: 4 },
+        { el: document.getElementById("L-det"), m: LAY.det, f: 1 },
+      ];
+      for (const l of layers) { l.el.style.width = l.m.w + "px"; l.el.style.height = l.m.h + "px"; }
+
+      const LABELS = [];
+      function addLabel(text, wx, wy, cls, size, sRange, anchor) {
+        const d = document.createElement("div");
+        d.className = "lbl " + cls; d.textContent = text; d.style.fontSize = size + "px";
+        document.getElementById("labels").appendChild(d);
+        LABELS.push({ d, wx, wy, sRange, anchor: anchor || "c", size });
+      }
+      // escala ampla (abertura)
+      addLabel("ARGENTINA", ...world(-71.08, -40.02), "country", 44, [0, 0.075]);
+      addLabel("CHILE", ...world(-72.25, -40.10), "country", 44, [0, 0.075]);
+      // escala da rota
+      for (const lb of R.labels) {
+        if (lb.k === "lake") { addLabel(lb.t, lb.x, lb.y, "lake", 30, [lb.t === "Lago Queñi" ? 0.5 : 0.12, 9]); if (lb.t !== "Lago Lolog") LABELS[LABELS.length - 1].hideOv = true; }
+        else addLabel(lb.t, lb.x, lb.y, "country", 34, [0.3, 9]);
+      }
+      // cidades na abertura
+      addLabel("SAN MARTÍN DE LOS ANDES", WP.sma.x, WP.sma.y, "city", 24, [0, 0.12], "b");
+      addLabel("PIRIHUEICO ●", WP.pirehueico.x, WP.pirehueico.y, "city", 24, [0, 0.12], "r");
+
+      // pinos (lado do rótulo na visão geral: [dx, dy])
+      const SHORT = { sma: "SAN MARTÍN", lacar: "MIRADOR", ripio: "ALTO RP48", yuco: "YUCO", nonthue: "NONTHUÉ", huahum: "PUERTO HUA HUM", border: "PASO HUA HUM", pirehueico: "PIREHUEICO" };
+      const PIN_SIDE = { sma: [-18, 30, "r"], lacar: [-18, -34, "r"], ripio: [18, -34, "l"], yuco: [-18, 30, "r"], nonthue: [-20, 0, "r"], huahum: [18, 34, "l"], border: [18, -34, "l"], pirehueico: [18, -34, "l"] };
+      const PINS = R.waypoints.map((w) => {
+        const d = document.createElement("div");
+        d.className = "pin";
+        d.innerHTML = `<div class="ping"></div><div class="ping"></div><div class="ring"></div><div class="plabel"><b>${fmt1(w.km)}</b><span class="nl">${w.name.toUpperCase()}</span><span class="ns">${SHORT[w.id]}</span></div>`;
+        document.getElementById("pins").appendChild(d);
+        return { w, d, ring: d.querySelector(".ring"), pings: d.querySelectorAll(".ping"), lab: d.querySelector(".plabel"), t: ARRIVE[w.id] };
+      });
+
+      // caminhos SVG
+      const $ = (id) => document.getElementById(id);
+      const elRest = $("route-rest"), elGlow = $("route-glow"), elCore = $("route-core"), elHi = $("route-hi");
+      const elBW = $("border-wide"), elBD = $("border-det");
+
+      // trilho de altimetria
+      (function buildRail() {
+        const E = R.elev, lo = 590, hi = 1050, top = 24, bot = 96;
+        const X = (km) => (km / TOTAL) * RW, Y = (e) => bot - ((e - lo) / (hi - lo)) * (bot - top);
+        let d = `M0 ${bot}`;
+        E.km.forEach((k, i) => { if (k <= TOTAL + 0.01) d += ` L${X(k).toFixed(1)} ${Y(E.ele[i]).toFixed(1)}`; });
+        d += ` L${RW} ${bot} Z`;
+        $("prof-bg").setAttribute("d", d); $("prof-fg").setAttribute("d", d);
+        $("rail-border").setAttribute("x1", X(KB)); $("rail-border").setAttribute("x2", X(KB));
+        let g = "";
+        for (const w of R.waypoints) g += `<line x1="${X(w.km)}" x2="${X(w.km)}" y1="96" y2="106" stroke="rgba(240,233,218,.7)" stroke-width="2"/>`;
+        $("rail-ticks").innerHTML = g;
+      })();
+
+      /* ===================== CARDS ===================== */
+      const CARDS = [
+        { id: "sma", s: 7.2, e: 12.0, img: "sma", km: "0", kick: "KM 0 · NEUQUÉN · ARGENTINA", ttl: "San Martín de los Andes", body: "Partida na margem leste do Lago Lácar. <em>37.352 habitantes</em> (censo 2022). Rumo oeste pela RP48." },
+        { id: "lacar", s: 12.0, e: 19.2, img: "lacar", km: "3,6", kick: "KM 3,6 · MIRADOR EL BALCÓN", ttl: "Lago Lácar", body: "Lago glacial de <em>25 km</em> e até <em>277 m</em> de profundidade. Suas águas correm para o Pacífico." },
+        { id: "ripio", s: 19.2, e: 26.4, img: "ripio", km: "16,5", kick: "KM 16,5 · RUTA PROVINCIAL 48 · RIPIO", ttl: "O ponto mais alto", body: "<em>1.038 m</em> na encosta norte do Lácar — mais alto que a própria fronteira, a 665 m." },
+        { id: "yuco", s: 26.4, e: 33.6, img: "yuco", inset: "yuco2", km: "27,1", kick: "KM 27,1 · PARQUE NACIONAL LANÍN", ttl: "Playa de Yuco", body: "Praias de areia na margem norte do Lácar, área recreativa diurna do parque nacional." },
+        { id: "nonthue", s: 33.6, e: 38.4, img: "nonthue", km: "38,3", kick: "KM 38,3 · PARQUE NACIONAL LANÍN", ttl: "Lago Nonthué", body: "Em mapudungun, <em>“lugar para cruzar de balsa”</em>. Separado do Lácar por um estreito de 50 m." },
+        { id: "huahum", s: 38.4, e: 43.2, img: "huahum", inset: "huahum2", km: "41,3", kick: "KM 41,3 · PUERTO HUA HUM", ttl: "Río Hua Hum", body: "O rio nasce aqui e cruza a cordilheira até o Lago Pirihueico. <em>Nós vamos junto.</em>" },
+        { id: "border", s: 43.2, e: 49.2, img: "border", km: "43,7", kick: "KM 43,7 · FRONTEIRA ARGENTINA–CHILE", ttl: "Paso Hua Hum", body: "Um dos passos mais baixos entre os dois países, <em>transitável o ano todo</em>." },
+        { id: "ch203", s: 49.2, e: 55.2, data: true, kick: "CHILE · REGIÓN DE LOS RÍOS", ttl: "Ruta CH-203", body: "Do outro lado, a estrada desce pelo vale do Hua Hum até o <em>Lago Pirihueico</em>." },
+        { id: "pirehueico", s: 55.2, e: 62.4, img: "pirehueico", inset: "pirehueico2", km: "54,3", kick: "KM 54,3 · PANGUIPULLI · CHILE", ttl: "Puerto Pirehueico", body: "Chegada ao Lago Pirihueico — <em>“lagoa de neve”</em> em mapudungun. Daqui, só de balsa." },
+        { id: "summary", s: 62.4, e: 69.6, stats: true, kick: "DIÁRIO DE BORDO · RESUMO", ttl: "Dois carros, dois países", body: "San Martín de los Andes ▸ Puerto Pirehueico pelo Paso Hua Hum, de <em>Tucson</em> e <em>Defender 110</em>." },
+      ];
+      const host = $("cards");
+      for (const c of CARDS) {
+        const sec = document.createElement("section");
+        sec.className = "card clip"; sec.id = "card-" + c.id;
+        sec.setAttribute("data-start", c.s); sec.setAttribute("data-duration", (c.e - c.s + 0.6).toFixed(2)); sec.setAttribute("data-track-index", "3");
+        let top = "";
+        if (c.img) top = `<div class="ph"><img class="main" src="assets/photos/${c.img}.jpg" alt="" /><div class="shade"></div><div class="kmbadge">KM ${c.km}</div></div>` + (c.inset ? `<div class="inset"><img src="assets/photos/${c.inset}.jpg" alt="" /></div>` : "");
+        if (c.data) top = `<div class="ph databox"><div class="big" id="d-km">10,6<small>KM</small></div><div class="lab">DO PASSO AO LAGO</div><div class="lab" style="top:84px;color:var(--accent)">DESCIDA DE 59 M</div><svg viewBox="0 0 580 160"><path id="d-prof" fill="none" stroke="#f4a62a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path id="d-area" fill="rgba(244,166,42,.14)"/></svg><div class="ax" style="left:30px">665 M · FRONTEIRA</div><div class="ax" style="right:30px">606 M · LAGO</div></div>`;
+        if (c.stats) top = `<div class="stats"><div class="stat"><div class="v"><span data-count="54.3" data-dec="1">0</span><small>KM</small></div><div class="l">DE ESTRADA</div></div><div class="stat"><div class="v"><span data-count="1038" data-dec="0">0</span><small>M</small></div><div class="l">PONTO MAIS ALTO · KM 16,5</div></div><div class="stat"><div class="v"><span data-count="665" data-dec="0">0</span><small>M</small></div><div class="l">NA FRONTEIRA · KM 43,7</div></div><div class="stat"><div class="v"><span data-count="2" data-dec="0">0</span><small>PAÍSES</small></div><div class="l">ARGENTINA ▸ CHILE</div></div></div>`;
+        const words = c.ttl.split(" ").map((w) => `<span class="w"><span>${w}</span></span>`).join("");
+        sec.innerHTML = `<div class="inner">${top}<div class="txt"><div class="kick">${c.kick}</div><h2 class="ttl">${words}</h2><p class="body">${c.body}</p></div></div>`;
+        host.appendChild(sec);
+      }
+      // créditos
+      const cred = document.createElement("section");
+      cred.className = "card clip"; cred.id = "credits"; cred.setAttribute("data-start", "69.6"); cred.setAttribute("data-duration", "4.8"); cred.setAttribute("data-track-index", "3");
+      cred.innerHTML = `<div class="inner"><div class="col">
+        <div class="kick" style="position:static">CRÉDITOS</div>
+        <h3 style="margin-top:14px">MAPA, DADOS E FOTOS</h3>
+        <p><b>Satélite:</b> Esri World Imagery (Esri, Maxar, Earthstar Geographics) · lagos e fronteira: © colaboradores do OpenStreetMap (ODbL) · limites amplos: Natural Earth · rota: OSRM · altitude: SRTM 30 m via OpenTopoData · fatos: Wikipedia (ES).</p>
+        <p><b>Fotos (Wikimedia Commons):</b> Albasmalko (domínio público; CC BY-SA 3.0) · Marco Antonio Correa Flores (CC BY-SA 4.0) · Falk2 (CC BY-SA 4.0) · Gervacio Rosales (CC BY 3.0) · Manueldutruel (CC BY-SA 4.0).</p>
+        <p><b>Carros:</b> ilustração gerada por IA (flux2-klein) · <b>Trilha:</b> gerada por IA (Lyria 3 Pro).</p>
+      </div></div>`;
+      host.appendChild(cred);
+
+      // perfil do card CH-203
+      (function () {
+        const E = R.elev, pts = [];
+        E.km.forEach((k, i) => { if (k >= KB - 0.01 && k <= TOTAL + 0.3) pts.push([k, E.ele[i]]); });
+        const X = (k) => ((k - KB) / (TOTAL - KB)) * 570 + 5, Y = (e) => 150 - ((e - 590) / (700 - 590)) * 140;
+        let d = "";
+        pts.forEach((p, i) => (d += (i ? " L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)));
+        $("d-prof").setAttribute("d", d);
+        $("d-area").setAttribute("d", d + ` L${X(pts[pts.length - 1][0])} 158 L5 158 Z`);
+      })();
+
+      /* ===================== RENDER(t) ===================== */
+      const carT = { root: $("car-t"), body: $("car-t-body"), tag: $("car-t-tag") };
+      const carD = { root: $("car-d"), body: $("car-d-body"), tag: $("car-d-tag") };
+      const kmVal = $("km-val"), altVal = $("alt-val"), coords = $("coords");
+      let lastTxt = {};
+      function setTxt(el, key, html) { if (lastTxt[key] !== html) { el.innerHTML = html; lastTxt[key] = html; } }
+      function scr(cam, x, y) { return [FW / 2 + (x - cam.cx) * cam.S, FH / 2 + (y - cam.cy) * cam.S]; }
+      function polyStr(cam, k0, k1) {
+        const i0 = Math.max(0, Math.floor(k0 / STEP)), i1 = Math.min(PTS.length - 1, Math.ceil(k1 / STEP));
+        const step = Math.max(1, Math.round(2.5 / (STEP * PXKM * cam.S)));
+        let s = "";
+        const a = scr(cam, ...posAt(k0)); s += a[0].toFixed(1) + "," + a[1].toFixed(1) + " ";
+        for (let i = i0 + 1; i < i1; i += step) { const p = scr(cam, PTS[i][0], PTS[i][1]); s += p[0].toFixed(1) + "," + p[1].toFixed(1) + " "; }
+        const b = scr(cam, ...posAt(k1)); s += b[0].toFixed(1) + "," + b[1].toFixed(1);
+        return s;
+      }
+      function pathStr(cam, ways) {
+        let d = "";
+        for (const w of ways) { w.forEach((p, i) => { const q = scr(cam, p[0], p[1]); d += (i ? "L" : "M") + q[0].toFixed(1) + " " + q[1].toFixed(1); }); }
+        return d;
+      }
+      function dms(v, pos, neg) {
+        const a = Math.abs(v), d = Math.floor(a), m = Math.floor((a - d) * 60), s = Math.round(((a - d) * 60 - m) * 60);
+        return `${d}°${String(m).padStart(2, "0")}′${String(Math.min(59, s)).padStart(2, "0")}″${v < 0 ? neg : pos}`;
+      }
+      function placeCar(car, cam, km, t, tagOn, tagSide) {
+        const p = scr(cam, ...posAt(km)), h = headingAt(km) + Math.PI / 2;
+        const drop = smooth(8.7, 9.5, t), sc = lerp(2.4, 1, drop);
+        car.root.style.transform = `translate(${p[0].toFixed(2)}px, ${p[1].toFixed(2)}px)`;
+        car.root.style.opacity = drop.toFixed(3);
+        car.body.style.transform = `rotate(${h.toFixed(4)}rad) scale(${sc.toFixed(3)})`;
+        car.tag.style.opacity = tagOn.toFixed(3);
+        car.tag.style.transform = `translate(${tagSide > 0 ? 26 : -26}px, -58px) translateX(${tagSide > 0 ? 0 : -100}%)`;
+      }
+
+      const st = { t: 0 };
+      function render() {
+        const t = st.t;
+        const cam = camera(t);
+        // camadas
+        for (const l of layers) {
+          const x = FW / 2 + (l.m.ox * l.f - cam.cx) * cam.S, y = FH / 2 + (l.m.oy * l.f - cam.cy) * cam.S;
+          l.el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) scale(${(cam.S * l.f).toFixed(5)})`;
+        }
+        const oMid = smooth(0.09, 0.13, cam.S), oDet = smooth(0.10, 0.15, cam.S);
+        layers[1].el.style.opacity = oMid.toFixed(3); layers[1].el.style.visibility = oMid > 0.001 ? "visible" : "hidden";
+        layers[2].el.style.opacity = oDet.toFixed(3); layers[2].el.style.visibility = oDet > 0.001 ? "visible" : "hidden";
+
+        // fronteira
+        const bwO = 1 - smooth(0.07, 0.11, cam.S);
+        elBW.style.opacity = bwO.toFixed(3); elBD.style.opacity = (1 - bwO).toFixed(3);
+        if (bwO > 0.001) elBW.setAttribute("d", pathStr(cam, window.BORDER_WIDE)); else elBW.setAttribute("d", "");
+        if (bwO < 0.999) elBD.setAttribute("d", pathStr(cam, R.border)); else elBD.setAttribute("d", "");
+
+        // rota: prévia tracejada aparece na abertura
+        const P = progress(t), gap = 62 / (driveCam(t).S * PXKM), Pt = Math.max(0, P - gap);
+        const preview = smooth(1.2, 3.0, t);
+        elRest.setAttribute("points", polyStr(cam, 0, TOTAL));
+        elRest.style.opacity = (preview * (t < 60.6 ? 1 : 1 - smooth(60.6, 61.6, t))).toFixed(3);
+        const drawn = t < 9.6 ? 0 : P;
+        if (drawn > 0.02) {
+          const s = polyStr(cam, 0, drawn);
+          elGlow.setAttribute("points", s); elCore.setAttribute("points", s); elHi.setAttribute("points", s);
+        } else { elGlow.setAttribute("points", ""); elCore.setAttribute("points", ""); elHi.setAttribute("points", ""); }
+        const endPulse = t > 60.6 ? 0.55 + 0.45 * Math.sin((t - 60.6) * 2.6) : 0.55;
+        elGlow.style.opacity = endPulse.toFixed(3);
+
+        // rótulos
+        const carScr = scr(cam, ...posAt(t < 9.6 ? P0 : progress(t)));
+        for (const L of LABELS) {
+          const o = smooth(L.sRange[0] * 0.8, L.sRange[0], cam.S) * (1 - smooth(L.sRange[1], L.sRange[1] * 1.25, cam.S)) * (L.sRange[0] === 0 ? 1 : 1);
+          let oo = o;
+          if (L.sRange[0] === 0) oo = (1 - smooth(L.sRange[1] * 0.8, L.sRange[1], cam.S)) * smooth(0.6, 1.8, t);
+          const [x, y] = scr(cam, L.wx, L.wy);
+          const tx = L.anchor === "l" ? -12 : L.anchor === "r" ? -100 : -50;
+          const ox = L.anchor === "l" ? -8 : L.anchor === "r" ? 8 : 0;
+          const oy = L.anchor === "b" ? 34 : 0;
+          if (L.hideOv) oo *= 1 - smooth(58.4, 59.6, t);
+          if (L.sRange[0] > 0) {
+            oo *= smooth(165, 215, y) * (1 - smooth(780, 830, y));
+            const dc = Math.hypot(x - carScr[0], y - carScr[1]);
+            oo *= smooth(130, 230, dc);
+          }
+          L.d.style.opacity = oo.toFixed(3);
+          L.d.style.transform = `translate(${(x + ox).toFixed(1)}px, ${(y + oy).toFixed(1)}px) translate(${tx}%, -50%)`;
+        }
+
+        // pinos
+        const overview = smooth(59.4, 60.8, t);
+        for (const pn of PINS) {
+          const [x, y] = scr(cam, pn.w.x, pn.w.y);
+          const vis = smooth(8.8, 9.6, t);
+          pn.d.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+          pn.d.style.opacity = vis.toFixed(3);
+          const visited = t >= pn.t ? 1 : 0;
+          pn.ring.style.background = visited ? "#f4a62a" : "rgba(12,19,16,.75)";
+          pn.ring.style.borderColor = visited ? "#fff3dc" : "#f0e9da";
+          pn.pings.forEach((pg, j) => {
+            const a = (t - pn.t - j * 0.35) / 1.3;
+            if (a >= 0 && a <= 1) { pg.style.opacity = (1 - a).toFixed(3); pg.style.transform = `scale(${(1 + a * 3.2).toFixed(3)})`; }
+            else pg.style.opacity = "0";
+          });
+          // rótulo: no modo seguir, só o waypoint ativo (±); no fim, todos
+          let near = Math.abs(t - pn.t) < 2.6 && t > 8.8 && t < 57.6 ? 1 - smooth(1.8, 2.6, Math.abs(t - pn.t)) : 0;
+          if (pn.w.id === "sma") near = 0;
+          if (pn.w.id === "border") near *= 1 - smooth(42.7, 42.95, t) * (1 - smooth(45.6, 46.0, t));
+          if (pn.w.id === "pirehueico" && t > pn.t - 0.6) near *= 1 - smooth(pn.t - 0.6, pn.t, t);
+          const lo = Math.max(near, overview);
+          pn.lab.style.opacity = lo.toFixed(3);
+          const side = overview > 0.5 ? PIN_SIDE[pn.w.id] : [18, 0, "l"];
+          pn.d.classList.toggle("ov", overview > 0.5);
+          pn.lab.style.transform = `translate(${side[0] - 20}px, ${side[1]}px) translateX(${side[2] === "r" ? "-100%" : "0%"})` ;
+        }
+
+        // carros
+        const tagOn = smooth(9.0, 9.6, t) * (1 - smooth(12.0, 12.8, t)) + smooth(55.4, 56.1, t) * (1 - smooth(57.6, 58.3, t));
+        const pd = scr(cam, ...posAt(P)), ptu = scr(cam, ...posAt(Pt));
+        const side = pd[0] <= ptu[0] ? -1 : 1;
+        placeCar(carT, cam, Pt, t, tagOn, -side);
+        placeCar(carD, cam, P, t, tagOn, side);
+
+        // HUD
+        const kmShow = t < 9.6 ? 0 : P;
+        setTxt(kmVal, "km", `${fmt1(kmShow)}<small>/ ${fmt1(TOTAL)}</small>`);
+        setTxt(altVal, "alt", `${fmtInt(eleAt(kmShow))}<small>M</small>`);
+        const ll = unworld(...posAt(kmShow));
+        setTxt(coords, "co", `${dms(ll[1], "N", "S")} · ${dms(ll[0], "E", "W")}`);
+        const inCL = P >= KB - 0.001 && t >= 43.2;
+        const flip = smooth(43.2, 43.7, t);
+        $("flag-ar").style.opacity = (1 - flip).toFixed(3); $("flag-cl").style.opacity = flip.toFixed(3);
+        setTxt($("country-txt"), "ct", inCL ? "CHILE" : "ARGENTINA");
+        setTxt($("road-txt"), "rd", inCL ? "RUTA CH-203" : "RUTA PROV. 48");
+        // escala gráfica
+        const mPerPx = 1000 / (PXKM * cam.S);
+        const nice = [0.5, 1, 2, 5, 10, 20, 50, 100].find((v) => (v * 1000) / mPerPx >= 90) || 100;
+        $("scale-bar").style.width = ((nice * 1000) / mPerPx).toFixed(1) + "px";
+        setTxt($("scale-txt"), "sc", `${String(nice).replace(".", ",")} KM`);
+        // trilho
+        $("rail-rect").setAttribute("width", ((kmShow / TOTAL) * RW).toFixed(1));
+        $("rail-d").setAttribute("cx", ((kmShow / TOTAL) * RW).toFixed(1));
+        $("rail-t").setAttribute("cx", (((t < 9.6 ? 0 : Pt) / TOTAL) * RW).toFixed(1));
+      }
+
+      /* ===================== TIMELINE ===================== */
+      const tl = gsap.timeline({ paused: true });
+      tl.to(st, { t: 74.4, duration: 74.4, ease: "none", onUpdate: render }, 0);
+
+      // abertura
+      tl.fromTo("#brand", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
+      tl.fromTo("#coords", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, 0.5);
+      tl.fromTo("#frame", { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 1.1, ease: "power2.out" }, 0);
+      tl.fromTo("#it-k", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 0.9);
+      tl.fromTo(["#it-1", "#it-2", "#it-3"], { yPercent: 105 }, { yPercent: 0, duration: 0.8, ease: "power4.out", stagger: 0.14 }, 1.1);
+      tl.to("#intro-title", { opacity: 0, y: -30, duration: 0.6, ease: "power2.in" }, 7.0);
+      tl.set("#intro-title", { visibility: "hidden" }, 7.65);
+      tl.fromTo("#rail", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, 1.6);
+      tl.fromTo("#hud-km, #hud-alt, #hud-scale, #hud-country", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power1.out", stagger: 0.08 }, 8.4);
+      tl.set("#stamp, #end-title", { opacity: 0, visibility: "hidden" }, 0);
+      tl.set("#stamp", { visibility: "visible" }, 42.9);
+      tl.set("#stamp", { visibility: "hidden" }, 45.85);
+      tl.set("#end-title", { visibility: "visible" }, 60.95);
+
+      // painel do comboio
+      tl.fromTo("#convoy .kick", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, 1.4);
+      tl.fromTo("#cv-t", { x: -620 }, { x: 0, duration: 1.3, ease: "power3.out" }, 1.7);
+      tl.fromTo("#cv-d", { x: 700 }, { x: 0, duration: 1.3, ease: "power3.out" }, 2.1);
+      tl.fromTo("#convoy .nm, #convoy .sub, #convoy .floor", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.06 }, 2.8);
+      tl.fromTo("#convoy .chip", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.6)", stagger: 0.14 }, 4.8);
+      tl.to("#convoy .inner", { opacity: 0, x: -60, duration: 0.5, ease: "power2.in" }, 7.1);
+
+      // cards
+      for (const c of CARDS) {
+        const q = (sel) => `#card-${c.id} ${sel}`;
+        const s = c.s;
+        if (c.img) {
+          tl.fromTo(q(".ph"), { clipPath: "inset(0% 0% 0% 100% round 22px)" }, { clipPath: "inset(0% 0% 0% 0% round 22px)", duration: 0.75, ease: "power3.inOut" }, s);
+          tl.fromTo(q("img.main"), { scale: 1.22, x: 40 }, { scale: 1.04, x: 0, duration: 1.0, ease: "power3.out" }, s);
+          tl.to(q("img.main"), { scale: 1.0, x: -24, duration: c.e - s - 0.4, ease: "none" }, s + 1.0);
+          tl.fromTo(q(".kmbadge"), { scale: 0.4, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.45, ease: "back.out(2)" }, s + 0.55);
+        } else {
+          tl.fromTo(q(".ph, .stats"), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, s);
+        }
+        if (c.inset) tl.fromTo(q(".inset"), { opacity: 0, scale: 0.55, rotation: -14 }, { opacity: 1, scale: 1, rotation: -4, duration: 0.7, ease: "back.out(1.7)" }, s + 1.2);
+        tl.fromTo(q(".kick"), { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.5, ease: "power3.out" }, s + 0.3);
+        tl.fromTo(q(".ttl .w > span"), { yPercent: 110 }, { yPercent: 0, duration: 0.7, ease: "power4.out", stagger: 0.07 }, s + 0.35);
+        tl.fromTo(q(".body"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, s + 0.7);
+        tl.to(q(".inner"), { opacity: 0, y: -18, duration: 0.45, ease: "power2.in" }, c.e + 0.05);
+      }
+      // card de dados: perfil desenhando
+      tl.fromTo("#d-prof", { strokeDasharray: 1400, strokeDashoffset: 1400 }, { strokeDashoffset: 0, duration: 2.0, ease: "power2.inOut" }, 49.8);
+      tl.fromTo("#d-area", { opacity: 0 }, { opacity: 1, duration: 1.0, ease: "power1.out" }, 50.8);
+      // resumo: contagem
+      document.querySelectorAll("[data-count]").forEach((el, i) => {
+        const target = parseFloat(el.dataset.count), dec = parseInt(el.dataset.dec, 10), o = { v: 0 };
+        tl.to(o, { v: target, duration: 1.4, ease: "power3.out", onUpdate: () => { el.textContent = dec ? o.v.toFixed(dec).replace(".", ",") : Math.round(o.v).toLocaleString("pt-BR"); } }, 62.7 + i * 0.15);
+      });
+      tl.fromTo("#card-summary .stat", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.6)", stagger: 0.12 }, 62.5);
+      // créditos
+      tl.fromTo("#credits .col > *", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.1 }, 69.8);
+
+      // carimbo da fronteira (no compasso 43,2)
+      tl.fromTo("#stamp", { opacity: 0, scale: 1.9, rotation: -2 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.28, ease: "power4.in" }, 42.92);
+      tl.to("#frame", { x: 10, duration: 0.05, ease: "none", yoyo: true, repeat: 3 }, 43.2);
+      tl.to("#stamp", { opacity: 0, scale: 0.96, duration: 0.6, ease: "power2.in" }, 45.2);
+      tl.fromTo("#brand-sub", { color: "#aab4a9" }, { color: "#f4a62a", duration: 0.3, yoyo: true, repeat: 1 }, 43.2);
+
+      // fim
+      tl.fromTo("#end-title", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.9, ease: "power3.out" }, 61.0);
+      tl.fromTo("#end-title h1", { scale: 1.08, transformOrigin: "0% 50%" }, { scale: 1, duration: 2.2, ease: "power3.out" }, 61.0);
+      tl.to("#hud-km, #hud-alt", { opacity: 0, duration: 0.5 }, 60.4);
+      tl.set("#hud-km, #hud-alt", { visibility: "hidden" }, 60.95);
+      tl.to("#dim", { opacity: 1, duration: 1.0, ease: "power1.inOut" }, 69.4);
+      tl.fromTo("#fadeout", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power1.in" }, 73.6);
+
+      render();
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>
