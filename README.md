@@ -1,5 +1,7 @@
 # Expedição Sul — animações de trajeto
 
+[![Expedição Sul](guia/assets/banner.jpg)](https://inematds.github.io/expedicaosul/guia/)
+
 Três viagens de carro pelos Andes, pelo pampa e pelo litoral do Uruguai, transformadas em **animações de mapa**:
 satélite real, o veículo andando na estrada verdadeira, painel com km, altitude, país e estrada, e embaixo um
 **diário de bordo** com foto real e um fato verificado de cada lugar por onde se passa. Cada viagem sai em
