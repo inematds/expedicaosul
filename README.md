@@ -7,6 +7,10 @@ satélite real, o veículo andando na estrada verdadeira, painel com km, altitud
 
 Feito com [HyperFrames](https://hyperframes.heygen.com) (HTML → vídeo) e Claude Code, em 24/09/2026.
 
+## 📖 Guia de uso
+
+Guia completo (os 6 vídeos + como o motor de rota funciona + passo a passo): **https://inematds.github.io/expedicaosul/guia/**
+
 ---
 
 ## Os vídeos
