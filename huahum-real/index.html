@@ -952,7 +952,9 @@
 
       tl.fromTo("#sec", { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.2);
       tl.fromTo("#coords", { opacity: 0 }, { opacity: 1, duration: 0.8, ease: "power2.out" }, 0.5);
-      tl.fromTo("#mini", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, 0.3);
+      tl.fromTo("#mini", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.9, ease: "power2.out" }, 2.8);
+      tl.set("#convoy .inner", { opacity: 0 }, 0);
+      tl.set("#convoy .inner", { opacity: 1 }, 2.85);
       tl.fromTo("#frame", { opacity: 0, scale: 0.97 }, { opacity: 1, scale: 1, duration: 1.1, ease: "power2.out" }, 0);
       tl.fromTo("#it-k", { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 3.2);
       tl.fromTo(["#it-1", "#it-2", "#it-3"], { yPercent: 105 }, { yPercent: 0, duration: 0.8, ease: "power4.out", stagger: 0.14 }, 3.4);

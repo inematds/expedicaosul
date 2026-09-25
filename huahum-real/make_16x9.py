@@ -1,13 +1,16 @@
-"""Gera ../huahum-real-16x9/index.html a partir do index.html 9:16 (mesmo conteúdo, layout 1920×1080).
+"""Gera ../huahum-real[-<lang>]-16x9/index.html a partir do index.html 9:16 (arg opcional: en|es) (mesmo conteúdo, layout 1920×1080).
 
 Layout 16:9: topo com NOSSO PLANO / NOSSA AVENTURA grande · esquerda: mapa detalhado 1100×910 ·
 direita: mapa geral 710×270, fotos 710×400, texto. Rodar de novo a cada mudança no 9:16.
 """
 import os, re
 
+import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(os.path.dirname(HERE), 'huahum-real-16x9')
-s = open(os.path.join(HERE, 'index.html'), encoding='utf-8').read()
+LANG = sys.argv[1] if len(sys.argv) > 1 else ''  # '' = PT; 'en'/'es' = saída de make_lang.py
+NAME = 'huahum-real' + (f'-{LANG}' if LANG else '')
+OUT = os.path.join(os.path.dirname(HERE), NAME + '-16x9')
+s = open(os.path.join(os.path.dirname(HERE), NAME, 'index.html'), encoding='utf-8').read()
 
 def rep(a, b, count=1):
     global s
@@ -68,7 +71,7 @@ s = s.replace('    </style>', css + '    </style>', 1)
 os.makedirs(OUT, exist_ok=True)
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf-8').write(s)
 for f in ('package.json', 'hyperframes.json', 'meta.json'):
-    t = open(os.path.join(HERE, f), encoding='utf-8').read().replace('"huahum-real"', '"huahum-real-16x9"')
+    t = open(os.path.join(HERE, f), encoding='utf-8').read().replace('"huahum-real"', f'"{NAME}-16x9"')
     open(os.path.join(OUT, f), 'w', encoding='utf-8').write(t)
 link = os.path.join(OUT, 'assets')
 if not os.path.islink(link):

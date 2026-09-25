@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Expedição Sul — animações de trajeto e o motor de rota</title>
 <meta name="description" content="Três viagens de carro pelos Andes, pampa e litoral do Uruguai viraram animações de mapa com satélite real, veículo na estrada verdadeira, HUD e diário de bordo. Veja os 8 vídeos e como o motor de rota (HTML + GSAP + HyperFrames) funciona por dentro.">
+<link rel="alternate" hreflang="pt-BR" href="https://inematds.github.io/expedicaosul/guia/">
+<link rel="alternate" hreflang="en" href="https://inematds.github.io/expedicaosul/guia/en/">
+<link rel="alternate" hreflang="es" href="https://inematds.github.io/expedicaosul/guia/es/">
+<link rel="alternate" hreflang="x-default" href="https://inematds.github.io/expedicaosul/guia/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -48,6 +52,12 @@
   .btn{display:inline-block;background:var(--amb);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
   .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
   @media(max-width:760px){nav .links a.sec{display:none}}
+  nav .lang{display:inline-flex;align-items:center;gap:6px;font-family:Sora;font-size:.78rem;letter-spacing:.06em}
+  nav .lang a{color:var(--mut)} nav .lang a:hover{color:var(--txt)}
+  nav .lang a[aria-current]{color:var(--amb);font-weight:600}
+  nav .lang .dot{color:var(--mut);opacity:.45}
+  @media(max-width:560px){nav .clubpro,nav .sep{display:none}}
+  @media(max-width:440px){nav .links .btn{display:none}}
   .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
   .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(226,162,59,.22),transparent 70%);pointer-events:none}
   .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 22px}
@@ -131,6 +141,7 @@
     <a class="sec" href="#motor">O motor</a>
     <a class="sec" href="#guia">Nova viagem</a>
     <a class="sec" href="#custos">Custos</a>
+    <span class="lang" id="langsel" aria-label="Idioma"><a href="index.html" hreflang="pt-BR" lang="pt-BR" aria-current="page">PT</a><span class="dot">·</span><a href="en/index.html" hreflang="en" lang="en">EN</a><span class="dot">·</span><a href="es/index.html" hreflang="es" lang="es">ES</a></span>
     <button class="tgl" id="themeToggle" aria-label="Alternar tema" title="Alternar tema">🌙</button>
     <a class="btn" href="https://github.com/inematds/expedicaosul" target="_blank" rel="noopener">GitHub</a>
   </div>
@@ -366,7 +377,7 @@ cam    = <span class="k">camera</span>(t)        <span class="c">// centro + esc
   <span class="chip">Estado</span>
   <h2>O que está pronto e o que ainda é manual</h2>
   <p class="sub">Para quem for reaproveitar o motor.</p>
-  <div class="phase"><div class="tag">Pronto</div><div class="d"><strong>3 viagens, 6 vídeos</strong><span>Hua Hum (motor v1), a volta e a ida (motor v2 genérico), em 9:16 e 16:9.</span></div></div>
+  <div class="phase"><div class="tag">Pronto</div><div class="d"><strong>3 viagens, 8 vídeos</strong><span>Hua Hum (motor v1), a volta e a ida (motor v2 genérico) e “nosso plano × nossa aventura” (3 quadros, fotos da viagem), em 9:16 e 16:9 — este último também em inglês e espanhol.</span></div></div>
   <div class="phase"><div class="tag">Manual</div><div class="d"><strong>Baixar as pernas OSRM e escrever o trip.js</strong><span>Não há script que leia o link do Google Maps; as pernas e a agenda por parada são montadas à mão (hoje, pelo agente).</span></div></div>
   <div class="phase"><div class="tag">Manual</div><div class="d"><strong>Escolher fotos</strong><span>O script busca e monta folhas de contato; a escolha, conferida por local, vai para o picks.json.</span></div></div>
   <div class="phase"><div class="tag">Fora do git</div><div class="d"><strong>Masters 60 fps e cache de tiles</strong><span>Os masters (300+ MB) e os caches de satélite/fotos não estão no repositório; o repo leva a versão web.</span></div></div>
@@ -392,6 +403,10 @@ cam    = <span class="k">camera</span>(t)        <span class="c">// centro + esc
       try{ localStorage.setItem(KEY, light?'light':'dark'); }catch(e){}
     });
   })();
+  // seletor de idioma: leva junto a secao atual (#hash)
+  document.querySelectorAll('#langsel a').forEach(function(a){
+    a.addEventListener('click',function(){ a.href=a.getAttribute('href').split('#')[0]+location.hash; });
+  });
 </script>
 </body>
 </html>

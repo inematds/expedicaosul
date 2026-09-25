@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Expedição Sul — route animations and the route engine</title>
+<meta content="Three car trips through the Andes, the pampas, and Uruguay’s coastline became map animations with real satellite, a real road vehicle, HUD, and a logbook. Watch the 8 videos and see how the route engine (HTML + GSAP + HyperFrames) works under the hood." name="description"/>
+<link href="https://inematds.github.io/expedicaosul/guia/" hreflang="pt-BR" rel="alternate"/>
+<link href="https://inematds.github.io/expedicaosul/guia/en/" hreflang="en" rel="alternate"/>
+<link href="https://inematds.github.io/expedicaosul/guia/es/" hreflang="es" rel="alternate"/>
+<link href="https://inematds.github.io/expedicaosul/guia/" hreflang="x-default" rel="alternate"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#0c0c10; --bg2:#14141b; --card:#16161e; --line:#272730;
+    --txt:#e9e9ee; --mut:#9a9aa6; --amb:#E2A23B; --amb2:#f0c070; --sky:#38bdf8; --pro:#cbd5e1;
+    color-scheme:dark;
+  }
+  body.light{
+    --bg:#f6f7f9; --bg2:#eceef2; --card:#ffffff; --line:#e1e3ea;
+    --txt:#1a1a22; --mut:#5b5b68; --amb:#b9791d; --amb2:#a16207; --sky:#0369a1; --pro:#b45309;
+    color-scheme:light;
+  }
+  body.light .hero .glow{opacity:.5}
+  body.light pre{background:#0e0e14;color:#d6d6e0}
+  body.light pre .c{color:#8a8a98}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:Sora,sans-serif;line-height:1.15;margin:0}
+  a{color:var(--amb);text-decoration:none}
+  code,pre{font-family:"JetBrains Mono",monospace}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 22px}
+  .mut{color:var(--mut)} .amb{color:var(--amb)}
+  .chip{display:inline-block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amb);font-weight:600;font-family:Sora}
+  nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);background:rgba(12,12,16,.78);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:22px;height:60px}
+  nav .brand{display:flex;align-items:center;gap:8px;font-family:Sora;font-weight:800;letter-spacing:-.02em;color:var(--amb)}
+  nav .brand .emoji{font-size:1.25rem}
+  nav .sep{color:var(--mut);opacity:.45}
+  nav .inema{color:var(--sky);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .inema:hover{filter:brightness(1.15)}
+  nav .pro{color:var(--pro);font-weight:600;font-size:.88rem;font-family:Sora}
+  nav .pro:hover{filter:brightness(1.15)}
+  nav .clubpro{display:inline-flex;align-items:center;gap:6px}
+  nav .links{margin-left:auto;display:flex;align-items:center;gap:20px;font-size:.92rem}
+  nav .links a.sec{color:var(--mut)} nav .links a.sec:hover{color:var(--txt)}
+  .tgl{background:var(--bg2);border:1px solid var(--line);color:var(--txt);width:38px;height:38px;border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:1.05rem}
+  .tgl:hover{border-color:var(--amb)}
+  .btn{display:inline-block;background:var(--amb);color:#1a1206;font-weight:600;padding:.6em 1.05em;border-radius:10px;font-family:Sora}
+  .btn.ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+  @media(max-width:760px){nav .links a.sec{display:none}}
+  nav .lang{display:inline-flex;align-items:center;gap:6px;font-family:Sora;font-size:.78rem;letter-spacing:.06em}
+  nav .lang a{color:var(--mut)} nav .lang a:hover{color:var(--txt)}
+  nav .lang a[aria-current]{color:var(--amb);font-weight:600}
+  nav .lang .dot{color:var(--mut);opacity:.45}
+  @media(max-width:560px){nav .clubpro,nav .sep{display:none}}
+  @media(max-width:440px){nav .links .btn{display:none}}
+  .hero{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+  .hero .glow{position:absolute;inset:-40% -20% auto auto;width:70%;height:600px;background:radial-gradient(closest-side,rgba(226,162,59,.22),transparent 70%);pointer-events:none}
+  .hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding:74px 22px}
+  .hero h1{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:800;letter-spacing:-.025em}
+  .hero p.lead{font-size:1.18rem;color:var(--mut);margin:1.1em 0 1.6em;max-width:34ch}
+  .hero .cta{display:flex;gap:12px;flex-wrap:wrap}
+  .hero figure{margin:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px -30px #000}
+  .hero figure img{width:100%;display:block}
+  @media(max-width:780px){.hero .wrap{grid-template-columns:1fr;padding:48px 22px}}
+  section{padding:62px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800;letter-spacing:-.02em}
+  section .sub{color:var(--mut);margin:.6em 0 2em;max-width:62ch}
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)} .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:820px){.g3,.g4{grid-template-columns:1fr 1fr}}
+  @media(max-width:540px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  .card h3{font-size:1.05rem;margin-bottom:.4em}
+  .card p{color:var(--mut);font-size:.92rem;margin:0}
+  .num{display:inline-flex;width:30px;height:30px;align-items:center;justify-content:center;border-radius:8px;background:rgba(226,162,59,.14);color:var(--amb);font-family:Sora;font-weight:800;font-size:.9rem;margin-bottom:.7em}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .flow span{background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:.45em .9em;font-size:.85rem;font-family:Sora;font-weight:600}
+  .flow .arr{color:var(--amb);border:none;background:none;padding:0 .1em}
+  pre{background:#0a0a0e;border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow:auto;font-size:.86rem;line-height:1.6;color:#d6d6e0}
+  pre .c{color:#6f6f7c} pre .k{color:var(--amb2)} pre .s{color:#9ece6a}
+  .step{display:grid;grid-template-columns:46px 1fr;gap:16px;margin-bottom:26px}
+  .step .b{width:46px;height:46px;border-radius:12px;background:var(--amb);color:#1a1206;font-family:Sora;font-weight:800;font-size:1.25rem;display:flex;align-items:center;justify-content:center}
+  .step h3{font-size:1.12rem;margin-bottom:.3em}
+  .step p{color:var(--mut);margin:.2em 0 .7em}
+  .ex{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:680px){.ex{grid-template-columns:1fr}}
+  .ex figure{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  .ex figure img{width:100%;display:block}
+  .ex figcaption{padding:12px 14px;font-size:.88rem;color:var(--mut);background:var(--card)}
+  .phase{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line)}
+  .phase:last-child{border:none}
+  .phase .tag{flex:0 0 92px;font-family:Sora;font-weight:800;color:var(--amb)}
+  .phase .d strong{display:block;margin-bottom:.2em}
+  .phase .d span{color:var(--mut);font-size:.92rem}
+  footer{padding:46px 0;text-align:center;color:var(--mut);font-size:.9rem}
+  .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:.3em .8em;font-size:.78rem;color:var(--mut);margin:0 4px}
+  /* extras desta pagina (usam so as variaveis do padrao) */
+  .vids{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media(max-width:820px){.vids{grid-template-columns:1fr}}
+  .vid{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .vid video{width:100%;display:block;background:#000;aspect-ratio:16/9}
+  .vid .i{padding:14px 16px}
+  .vid h3{font-size:1.05rem}
+  .vid p{color:var(--mut);font-size:.88rem;margin:.35em 0 .7em}
+  .vid .fmt{display:flex;gap:8px;flex-wrap:wrap;font-size:.82rem}
+  .vid .fmt a{border:1px solid var(--line);border-radius:999px;padding:.25em .75em;color:var(--txt)}
+  .vid .fmt a:hover{border-color:var(--amb);color:var(--amb)}
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:Sora;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amb)}
+  td code{font-size:.82rem;color:var(--amb2)}
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+  .note{border-left:3px solid var(--amb);background:var(--card);padding:12px 16px;border-radius:0 10px 10px 0;color:var(--mut);font-size:.92rem;margin:18px 0}
+  h3.sec{font-size:1.2rem;margin:40px 0 .5em}
+  .anat{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;align-items:start}
+  @media(max-width:820px){.anat{grid-template-columns:1fr}}
+  .anat figure{margin:0;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+  .anat figure img{width:100%;display:block}
+  .anat ol{margin:0;padding-left:1.2em;color:var(--mut);font-size:.92rem}
+  .anat ol li{margin-bottom:.5em} .anat ol b{color:var(--txt)}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+<a class="brand" href="#top"><span class="emoji">🗺️</span> Expedição Sul</a>
+<span class="sep">|</span>
+<span class="clubpro">
+<a class="inema" href="https://inema.club" rel="noopener" target="_blank">INEMA.CLUB</a>
+<span class="sep">-</span>
+<a class="pro" href="https://inema.pro" rel="noopener" target="_blank">PRO</a>
+</span>
+<div class="links">
+<a class="sec" href="#videos">Videos</a>
+<a class="sec" href="#oque">What it is</a>
+<a class="sec" href="#motor">The engine</a>
+<a class="sec" href="#guia">New trip</a>
+<a class="sec" href="#custos">Costs</a>
+<span aria-label="Language" class="lang" id="langsel"><a href="../index.html" hreflang="pt-BR" lang="pt-BR">PT</a><span class="dot">·</span><a aria-current="page" href="index.html" hreflang="en" lang="en">EN</a><span class="dot">·</span><a href="../es/index.html" hreflang="es" lang="es">ES</a></span>
+<button aria-label="Toggle theme" class="tgl" id="themeToggle" title="Toggle theme">🌙</button>
+<a class="btn" href="https://github.com/inematds/expedicaosul" rel="noopener" target="_blank">GitHub</a>
+</div>
+</div></nav>
+<header class="hero" id="top">
+<div class="glow"></div>
+<div class="wrap">
+<div>
+<span class="chip">Route animations · HyperFrames</span>
+<h1>Real road trips become <span class="amb">animated map</span></h1>
+<p class="lead">Three car trips through the Andes, the pampas, and Uruguay’s coastline: real satellite, the car on the real road, HUD with km, altitude, and country, plus a logbook with a photo and a verified fact about each place.</p>
+<div class="cta">
+<a class="btn" href="#videos">Watch the videos</a>
+<a class="btn ghost" href="#motor">How the engine works</a>
+<a class="btn ghost" href="https://github.com/inematds/expedicaosul" rel="noopener" target="_blank">Code on GitHub</a>
+</div>
+</div>
+<figure><img alt="Expedição Sul banner: map of South America’s south with the route, the Defender on the ferry, and the engine resources (OSRM route + OSM ferry, satellite in layers, single clock, logbook, synced to the music, 9:16 and 16:9)" src="../assets/banner.jpg"/></figure>
+</div>
+</header>
+<section id="videos"><div class="wrap">
+<span class="chip">The videos</span>
+<h2>Three trips, eight videos</h2>
+<p class="sub">Each trip comes out in 9:16 (Reels/Shorts/WhatsApp) and 16:9 (YouTube/TV). The files here are the web version (30 fps); the 60 fps masters are outside git.</p>
+<div class="vids">
+<div class="vid">
+<video controls="" playsinline="" poster="../../videos/huahum-plan-and-adventure-16x9-en.jpg" preload="none" src="../../videos/huahum-plan-and-adventure-16x9-en.mp4"></video>
+<div class="i">
+<h3>Hua Hum: our plan and our adventure</h3>
+<p>The plan (SMA ▸ Pirihueico) and what happened: road cut off at km 32, Taos, the Defender 110 reaches the Río Hua Hum bridge, and the border is closed due to landslides. Overview map + detailed map + 43 trip photos · 2 min 54 s.</p>
+<div class="fmt"><a href="../../videos/huahum-plan-and-adventure-9x16-en.mp4" rel="noopener" target="_blank">9:16</a><a href="../../videos/huahum-plan-and-adventure-16x9-en.mp4" rel="noopener" target="_blank">16:9</a></div>
+</div>
+</div>
+<div class="vid">
+<video controls="" playsinline="" poster="../../videos/trajeto-hua-hum-16x9.jpg" preload="none" src="../../videos/trajeto-hua-hum-16x9.mp4"></video>
+<div class="i">
+<h3>Hua Hum</h3>
+<p>San Martín de los Andes (AR) ▸ Pirihueico (CL). Tucson + Defender · 54.3 km · 1 border · 74.4 s.</p>
+<div class="fmt"><a href="../../videos/trajeto-hua-hum-9x16.mp4" rel="noopener" target="_blank">9:16</a><a href="../../videos/trajeto-hua-hum-16x9.mp4" rel="noopener" target="_blank">16:9</a></div>
+</div>
+</div>
+<div class="vid">
+<video controls="" playsinline="" poster="../../videos/volta-defender-16x9.jpg" preload="none" src="../../videos/volta-defender-16x9.mp4"></video>
+<div class="i">
+<h3>The return trip</h3>
+<p>San Martín de los Andes ▸ Canela (RS). Defender 110 · 2,797 km · 3 countries · ferry across the Río de la Plata · 113.6 s.</p>
+<div class="fmt"><a href="../../videos/volta-defender-9x16.mp4" rel="noopener" target="_blank">9:16</a><a href="../../videos/volta-defender-16x9.mp4" rel="noopener" target="_blank">16:9</a></div>
+</div>
+</div>
+<div class="vid">
+<video controls="" playsinline="" poster="../../videos/ida-defender-16x9.jpg" preload="none" src="../../videos/ida-defender-16x9.mp4"></video>
+<div class="i">
+<h3>The outbound trip</h3>
+<p>Canela ▸ San Martín de los Andes. Defender 110 · 2,882 km · along Uruguay’s coastline, ferry Colonia ▸ Buenos Aires · 95.7 s.</p>
+<div class="fmt"><a href="../../videos/ida-defender-9x16.mp4" rel="noopener" target="_blank">9:16</a><a href="../../videos/ida-defender-16x9.mp4" rel="noopener" target="_blank">16:9</a></div>
+</div>
+</div>
+</div>
+</div></section>
+<section id="oque"><div class="wrap">
+<span class="chip">What it is</span>
+<h2>A route engine, not a video editor</h2>
+<p class="sub">Nothing here is assembled by hand in a timeline. One HTML page reads the trip data and draws each frame; HyperFrames records that page as a video.</p>
+<div class="grid g3">
+<div class="card"><h3>🛰️ Everything is real data</h3><p>OSRM road segments, ferry and OpenStreetMap borders, Esri satellite, SRTM altitude, facts from Wikipedia, and photos from Wikimedia Commons with author and license.</p></div>
+<div class="card"><h3>⏱️ A single clock</h3><p>Car, camera, traveled line, pins, HUD, altitude track, and cards all come from the same time function. That’s why nothing comes out of sync.</p></div>
+<div class="card"><h3>🎵 Synced to the music</h3><p>The soundtrack is analyzed (BPM and phase): the car sets off when the beat comes in, the ferry crosses during the calm segment, and the border stamp drops on the return.</p></div>
+</div>
+</div></section>
+<section id="motor"><div class="wrap">
+<span class="chip">How the engine works</span>
+<h2>From the Google Maps link to MP4</h2>
+<p class="sub">There are two halves: Python scripts that <b>prepare the data</b> (run once per trip) and an <code>index.html</code> that <b>draws the frame</b> from that data, for any instant <i>t</i>.</p>
+<div class="flow">
+<span>Stops from the link</span><span class="arr">→</span>
+<span>OSRM route + OSM ferry</span><span class="arr">→</span>
+<span>route.js (single km)</span><span class="arr">→</span>
+<span>Layered satellite</span><span class="arr">→</span>
+<span>Photos + facts</span><span class="arr">→</span>
+<span>trip.js (schedule)</span><span class="arr">→</span>
+<span>index.html renders t</span><span class="arr">→</span>
+<span>HyperFrames → MP4</span>
+</div>
+<h3 class="sec">1 · Anatomy of a frame</h3>
+<div class="anat">
+<figure><img alt="16:9 video frame of the return trip at km 675, near Río Colorado" src="../assets/quadro.jpg"/></figure>
+<ol>
+<li><b>Map</b>: satellite mosaic; the camera follows the car and changes zoom by itself.</li>
+<li><b>Amber line</b>: traveled segment. <b>Dashed</b>: what’s missing.</li>
+<li><b>Vehicle</b>: top-down sprite (generated in flux2-klein), rotated by the road direction.</li>
+<li><b>HUD</b>: current / total kilometer, altitude (SRTM), country flag, and road name (RN22, BR-290…).</li>
+<li><b>Altitude track</b>: the profile of the entire trip, with a cursor walking along with it.</li>
+<li><b>Logbook</b>: card with a photo, a kilometer, and a verified fact; some are data cards (altitude chart, counters).</li>
+</ol>
+</div>
+<h3 class="sec">2 · Prepare the data (<code>data/</code>, Python)</h3>
+<p class="mut">Each trip has its own folder <code>data/</code> with the scripts and the output. The scripts talk directly to open APIs and store a local cache.</p>
+<div class="tw"><table>
+<tr><th>Script</th><th>What it does</th><th>It outputs</th></tr>
+<tr><td><code>build_route2.py trip.json</code></td><td>It joins the OSRM legs and the ferry line (OSM) into a single route, with <b>a single cumulative kilometer</b>. It marks where the ferry starts/ends and where the border is (OSM polygon <code>admin_level=2</code>), fits each stop at the right kilometer, and looks up altitude every 5 km from OpenTopoData (SRTM 30 m). It resamples the route every 0.15 km in Web Mercator coordinates z14.</td><td><code>route_full.json</code> → <code>assets/route.js</code></td></tr>
+<tr><td><code>build_tiles.py</code></td><td>It downloads the Esri satellite in four levels: <code>ov</code> z7 (overview), <code>cor</code> z8 (route corridor), and for each stop <code>p10</code> z10 (±1.2°) and <code>p12</code> z12 (±0.3°). Each level turns into a graded JPG with its position in the world.</td><td><code>assets/map/*.jpg</code> + <code>assets/layers.js</code></td></tr>
+<tr><td><code>photos_search.py q.json dir</code></td><td>Looks for candidates in Wikimedia Commons (JPEG, landscape, ≥ 1400 px) and assembles contact sheets to choose.</td><td>contact sheets → <code>picks.json</code></td></tr>
+<tr><td><code>photos_get.py picks.json</code></td><td>Downloads the selected ones at 1600 px and saves the author, license, and page for each one.</td><td><code>assets/photos/</code> + <code>photo_credits.json</code></td></tr>
+<tr><td><code>fetch_facts.py pages.json</code></td><td>Downloads the text of the Wikipedia entries (ES/PT/EN). Each sentence of the cards comes from there, with the source saved.</td><td><code>data/facts/*.json</code></td></tr>
+<tr><td><code>beat.py música.mp3</code></td><td>Measures BPM and phase of the beat and the bar (spectral flow + autocorrelation). This tells you what second the car sets off and when the border stamp drops.</td><td>numbers for the <code>trip.js</code></td></tr>
+</table></div>
+<h3 class="sec">3 · Describe the trip (<code>assets/trip.js</code>)</h3>
+<p class="mut">This is the video script, written by hand. It says <b>when</b> the car is at each stop; the engine calculates everything else.</p>
+<pre><span class="c">// trecho real de volta-defender/assets/trip.js</span>
+schedule: [
+  { id: <span class="s">"sma"</span>,       dep: 9.4,             dwellKm: 42 },  <span class="c">// larga quando o groove entra (9,4 s)</span>
+  { id: <span class="s">"bb"</span>,        arr: 27.0, dep: 28.2, dwellKm: 42 },  <span class="c">// Bahía Blanca</span>
+  { id: <span class="s">"ferry_ba"</span>,  arr: 50.6, dep: 56.2, dwellKm: 80 },  <span class="c">// embarca em Buenos Aires</span>
+  { id: <span class="s">"ferry_col"</span>, arr: 64.8, dep: 66.4, dwellKm: 50 },  <span class="c">// desembarca em Colonia</span>
+  ...
+],
+ferry:  { dep: 56.2, arr: 64.8 },                         <span class="c">// travessia no trecho calmo da trilha</span>
+stamps: [{ t: 64.8, s1: <span class="s">"ARGENTINA ▸ URUGUAI"</span>, s2: <span class="s">"COLONIA"</span> }, ...],
+cards:  [{ id: <span class="s">"sma"</span>, s: 7.2, e: 13.2, img: <span class="s">"sma"</span>, km: <span class="s">"0"</span>, ttl: <span class="s">"San Martín de los Andes"</span>, body: <span class="s">"..."</span> }, ...]</pre>
+<p class="mut"><code>arr</code>/<code>dep</code> = second it arrives and leaves; <code>dwellKm</code> = how many km fit in the width of the frame while it’s stopped there (the stop zoom). <code>cards</code> have start and end (<code>s</code>/<code>e</code>) in seconds; <code>stamps</code> are the border stamps.</p>
+<h3 class="sec">4 · Draw the frame (<code>index.html</code>, JS + GSAP)</h3>
+<p class="mut">One GSAP timeline animates a number, <code>t</code>, from 0 to the duration. On each change it calls <code>render()</code>, which recalculates everything from scratch for that <i>t</i>. HyperFrames advances time frame by frame and records.</p>
+<pre><span class="k">tl</span>.to(st, { t: T.dur, duration: T.dur, ease: <span class="s">"none"</span>, onUpdate: render }, 0);
+
+<span class="c">// render(): para o instante t</span>
+km     = <span class="k">progress</span>(t)      <span class="c">// onde o carro está (em km)</span>
+[x, y] = <span class="k">posAt</span>(km)       <span class="c">// ponto da estrada nesse km</span>
+cam    = <span class="k">camera</span>(t)        <span class="c">// centro + escala do mapa</span>
+<span class="c">// → posiciona camadas de satélite, linha, pinos, rótulos, carro, HUD, trilho</span></pre>
+<div class="grid g2" style="margin-top:16px">
+<div class="card"><div class="num">t→km</div><h3>Time becomes kilometers</h3><p>Between the departure of one stop and arrival at the next, <code>progress(t)</code> uses a trapezoidal speed profile: accelerates, drives at a constant speed, brakes. While stopped, the kilometer doesn’t change. Since the kilometer is unique for the whole trip, ferry and road share the same axis.</p></div>
+<div class="card"><div class="num">cam</div><h3>The camera directs itself</h3><p>At the stop, the zoom shows <code>dwellKm</code> of width. In the middle of the segment, it zooms out to see ~85% (sine curve) and looks 20% ahead of the car; it doesn’t zoom out on the ferry. The video starts in overview, dips down to the departure, and in the end comes back to the whole route. Zoom is interpolated on a logarithmic scale, so it’s smooth.</p></div>
+<div class="card"><div class="num">z7–12</div><h3>A satellite that only appears fully intact</h3><p>The z7 → z8 → z10 → z12 layers are stacked by detail. A sharper layer only enters when it covers the entire frame. That way, you never see a crop edge.</p></div>
+<div class="card"><div class="num">HUD</div><h3>Display derived from the km</h3><p>Country (switch at the end of the ferry and at the border), road (from OSRM steps), altitude (SRTM interpolated), and car direction all come from the same km. Pins and labels have anti-collision and disappear when zooms out.</p></div>
+</div>
+<div class="note"><b>Cards and sounds</b> are not in <code>render()</code>: they are elements with <code>data-start</code>/<code>data-duration</code> (HyperFrames tracks), generated from <code>trip.js</code>. The music and effects (whoosh, stamp, ship horn) also have a fixed schedule, synced to the <code>beat.py</code>.</div>
+<h3 class="sec">5 · Two versions of the engine</h3>
+<div class="grid g2">
+<div class="card"><h3>v1 · <code>trajeto-hua-hum/</code></h3><p>The first one, custom-made for 54 km of mountain with two cars. Own scripts (<code>build_route.py</code>, <code>build_map.py</code>, <code>gen_cars.py</code>) and <code>water.py</code>, which repaints the lakes with OSM water polygons to remove satellite reflections.</p></div>
+<div class="card"><h3>v2 generic · <code>volta-defender/</code>, <code>ida-defender/</code></h3><p>Made for long trips: legs + ferry + border by configuration (<code>trip.json</code>), satellite in layers by stop. The return re-used the outbound engine and cost less than half.</p></div>
+</div>
+<h3 class="sec">6 · 9:16 and 16:9 with the same code</h3>
+<p class="mut">The <code>index.html</code> has two marked blocks, <code>/*LAYOUT-CSS-START*/</code> and <code>/*LAYOUT-JS-START*/</code> (frame size, card positions, fonts). <code>make_16x9.py</code> copies the project by swapping only those blocks; assets enter via symbolic link.</p>
+</div></section>
+<section id="pre"><div class="wrap">
+<span class="chip">Prerequisites</span>
+<h2>What you need on the machine</h2>
+<p class="sub">Everything runs locally. The used APIs (OSRM, Overpass, OpenTopoData, Esri, Wikipedia, Commons) are open and have no key.</p>
+<div class="grid g3">
+<div class="card"><h3>Node + HyperFrames</h3><p>To preview and render. The version is fixed in the <code>package.json</code> of each project.</p><pre><span class="k">npx</span> --yes hyperframes@0.8.72 --help</pre></div>
+<div class="card"><h3>Python 3</h3><p>For the data scripts: <code>numpy</code> and <code>Pillow</code>.</p><pre><span class="k">pip install</span> numpy pillow</pre></div>
+<div class="card"><h3>ffmpeg</h3><p>Used by <code>beat.py</code>, by the share render (−14 LUFS), and by the version ≤ 44 MB.</p><pre><span class="k">ffmpeg</span> -version</pre></div>
+</div>
+</div></section>
+<section id="guia"><div class="wrap">
+<span class="chip">Usage guide · step by step</span>
+<h2>Run a ready trip or make a new one</h2>
+<p class="sub">The data for the three trips is already in the repo. To view and render, you just need steps 1, 5, and 6. For a new trip, copy <code>ida-defender/</code> and redo steps 2 to 4.</p>
+<div class="step"><div class="b">1</div><div>
+<h3>Clone and open a trip</h3>
+<p>The HyperFrames preview opens the frame in the browser, with the timeline to drag.</p>
+<pre><span class="k">git clone</span> <span class="s">https://github.com/inematds/expedicaosul</span>
+<span class="k">cd</span> expedicaosul/ida-defender
+<span class="k">npm run</span> dev      <span class="c"># = npx hyperframes preview</span></pre>
+</div></div>
+<div class="step"><div class="b">2</div><div>
+<h3>Assemble the route</h3>
+<p>Save the OSRM route for each leg (<code>osrm_A.json</code>, <code>osrm_B.json</code>), the ferry line (<code>ferry.json</code>), and describe legs, border, and stops in <code>trip.json</code>. Separated legs anchored at the ends of the ferry prevent OSRM from taking the route overland.</p>
+<pre><span class="k">cd</span> ida-defender/data
+<span class="k">python3</span> build_route2.py trip.json   <span class="c"># → route_full.json (km único, balsa, fronteira, altitude)</span></pre>
+</div></div>
+<div class="step"><div class="b">3</div><div>
+<h3>Satellite, photos, and facts</h3>
+<p>Choose the photos from the contact sheets and log them in <code>picks.json</code>; list the entries in <code>pages.json</code>.</p>
+<pre><span class="k">python3</span> build_tiles.py route_full.json ../assets   <span class="c"># satélite z7/z8/z10/z12</span>
+<span class="k">python3</span> photos_search.py q_ida.json photos_cand  <span class="c"># buscas por parada → candidatas + folhas de contato</span>
+<span class="k">python3</span> photos_get.py picks.json ../assets       <span class="c"># fotos + créditos</span>
+<span class="k">python3</span> fetch_facts.py pages.json                <span class="c"># textos da Wikipedia</span></pre>
+</div></div>
+<div class="step"><div class="b">4</div><div>
+<h3>Sync with the music and write the <code>trip.js</code></h3>
+<p>Measure the beat and use the timings in the schedule: set off at the entry to the groove, ferry during the calm stretch, border stamp on the return.</p>
+<pre><span class="k">python3</span> data/beat.py assets/audio/music.mp3 12 55
+<span class="c"># → bpm, beat, beat phase, bar phase  → preencher schedule / ferry / stamps / cards</span></pre>
+</div></div>
+<div class="step"><div class="b">5</div><div>
+<h3>Check and generate the 16:9</h3>
+<pre><span class="k">npx</span> hyperframes check                              <span class="c"># sobreposição, texto fora do quadro</span>
+<span class="k">python3</span> make_16x9.py ida-defender ida-defender-16x9</pre>
+</div></div>
+<div class="step"><div class="b">6</div><div>
+<h3>Render</h3>
+<p>Master 60 fps + a share version with normalized audio; optionally, the lighter version for Telegram/web.</p>
+<pre><span class="k">./render_share.sh</span> ida-defender ida-defender-9x16     <span class="c"># renders/…-60fps.mp4 + …mp4 (−14 LUFS)</span>
+<span class="k">./tg_encode.sh</span> ida-defender/renders/ida-defender-9x16.mp4 videos/ida-defender-9x16.mp4   <span class="c"># ≤ 44 MB</span></pre>
+</div></div>
+</div></section>
+<section id="custos"><div class="wrap">
+<span class="chip">Measured costs</span>
+<h2>How much it cost to make</h2>
+<p class="sub">Measured in the Claude Code session logs (tokens per call), in API-equivalent dollars. If you use it by subscription, you don’t pay this value per usage; it’s for comparison.</p>
+<div class="tw"><table>
+<tr><th>Video</th><th>Agent time</th><th>AI cost (US$)</th><th>Magnific credits</th></tr>
+<tr><td>Hua Hum 9:16</td><td>55 min</td><td>13.12</td><td>190</td></tr>
+<tr><td>Hua Hum 16:9</td><td>~5 min</td><td>1.07</td><td>—</td></tr>
+<tr><td>The return trip (9:16 + 16:9)</td><td>38.5 min</td><td>15.18</td><td>180</td></tr>
+<tr><td>The outbound trip (9:16 + 16:9)</td><td>24.4 min</td><td>6.85</td><td>160</td></tr>
+<tr><td><b>Total</b></td><td><b>~2h03</b></td><td><b>36.22</b></td><td><b>530</b></td></tr>
+</table></div>
+<div class="note">98–99.5% of the input came from cache. The return trip paid for building the generic engine; the outbound trip only reused. Image (flux2-klein) and renders (HyperFrames) ran locally, with no cost. Details in <a href="https://github.com/inematds/expedicaosul/blob/main/README.en.md#production-statistics" rel="noopener" target="_blank">README</a>.</div>
+</div></section>
+<section id="roadmap"><div class="wrap">
+<span class="chip">Status</span>
+<h2>What’s done and what’s still manual</h2>
+<p class="sub">For anyone who wants to reuse the engine.</p>
+<div class="phase"><div class="tag">Done</div><div class="d"><strong>3 trips, 8 videos</strong><span>Hua Hum (v1 engine), the return and outbound trips (generic v2 engine) and “our plan × our adventure” (3 panels, trip photos), in 9:16 and 16:9 — the latter also in English and Spanish.</span></div></div>
+<div class="phase"><div class="tag">Manual</div><div class="d"><strong>Download the OSRM legs and write the trip.js</strong><span>There is no script that reads the Google Maps link; the legs and the schedule per stop are assembled by hand (today, by the agent).</span></div></div>
+<div class="phase"><div class="tag">Manual</div><div class="d"><strong>Choose photos</strong><span>The script searches and assembles contact sheets; the choice, verified by location, goes to picks.json.</span></div></div>
+<div class="phase"><div class="tag">Outside git</div><div class="d"><strong>Masters 60 fps and tile cache</strong><span>The masters (300+ MB) and the satellite/photo caches are not in the repository; the repo carries the web version.</span></div></div>
+</div></section>
+<footer>
+<div class="wrap">
+<div class="pill">HyperFrames</div><div class="pill">GSAP</div><div class="pill">OpenStreetMap · OSRM</div><div class="pill">Esri World Imagery</div><div class="pill">Claude Code</div>
+<p style="margin-top:18px">Expedição Sul · map: Esri, Maxar, Earthstar Geographics · © OpenStreetMap contributors (ODbL) · photos: Wikimedia Commons (credits in README) ·
+      <a href="https://github.com/inematds/expedicaosul">inematds/expedicaosul</a> ·
+      <a href="https://inema.club">INEMA.CLUB</a></p>
+</div>
+</footer>
+<script>
+  (function(){
+    var KEY='expedicaosul-theme';
+    var b=document.body, t=document.getElementById('themeToggle');
+    try{ if(localStorage.getItem(KEY)==='light'){ b.classList.add('light'); t.textContent='☀️'; } }catch(e){}
+    t.addEventListener('click',function(){
+      var light=b.classList.toggle('light');
+      t.textContent=light?'☀️':'🌙';
+      try{ localStorage.setItem(KEY, light?'light':'dark'); }catch(e){}
+    });
+  })();
+  // seletor de idioma: leva junto a secao atual (#hash)
+  document.querySelectorAll('#langsel a').forEach(function(a){
+    a.addEventListener('click',function(){ a.href=a.getAttribute('href').split('#')[0]+location.hash; });
+  });
+</script>
+</body>
+</html>

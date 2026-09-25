@@ -1,3 +1,5 @@
+**PT** · [EN](README.en.md) · [ES](README.es.md)
+
 # Expedição Sul — animações de trajeto
 
 [![Expedição Sul](guia/assets/banner.jpg)](https://inematds.github.io/expedicaosul/guia/)
@@ -19,6 +21,7 @@ Guia completo (os 8 vídeos + como o motor de rota funciona + passo a passo): **
 
 | Viagem | Veículo | Distância | Duração | 9:16 | 16:9 |
 |---|---|---|---|---|---|
+| **Hua Hum: nosso plano × nossa aventura** — o plano e o que aconteceu (estrada interrompida, fronteira fechada), com as fotos da viagem | VW Taos + Land Rover Defender 110 | 54,3 km planejados · ≈85 km rodados | 174 s | [ver](videos/huahum-plano-e-aventura-9x16.mp4) | [ver](videos/huahum-plano-e-aventura-16x9.mp4) |
 | **Hua Hum** — San Martín de los Andes (AR) ▸ Pirihueico (CL) | Hyundai Tucson + Land Rover Defender 110 | 54,3 km | 74,4 s | [assistir](videos/trajeto-hua-hum-9x16.mp4) | [assistir](videos/trajeto-hua-hum-16x9.mp4) |
 | **A volta** — San Martín de los Andes ▸ Canela (RS) | Defender 110 | 2.797 km | 113,6 s | [assistir](videos/volta-defender-9x16.mp4) | [assistir](videos/volta-defender-16x9.mp4) |
 | **A ida** — Canela ▸ San Martín de los Andes | Defender 110 | 2.882 km | 95,7 s | [assistir](videos/ida-defender-9x16.mp4) | [assistir](videos/ida-defender-16x9.mp4) |

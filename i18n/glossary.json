@@ -1,0 +1,182 @@
+{
+ "keep_literal": [
+  "Expedição Sul",
+  "Hua Hum",
+  "Paso Hua Hum",
+  "San Martín de los Andes",
+  "Pirihueico",
+  "Lago Lácar",
+  "RP48",
+  "Ruta Provincial 48",
+  "CH-203",
+  "Defender 110",
+  "Taos",
+  "Tucson",
+  "HyperFrames",
+  "GSAP",
+  "OSRM",
+  "OSM",
+  "Esri",
+  "SRTM",
+  "Lyria",
+  "flux2-klein",
+  "trip.js",
+  "Claude Code",
+  "INEMA",
+  "INEMA.CLUB",
+  "PRO",
+  "HUD",
+  "cam",
+  "t→km",
+  "z7–12",
+  "Magnific",
+  "Wikipedia",
+  "Wikimedia Commons",
+  "OpenStreetMap",
+  "OpenTopoData",
+  "Overpass",
+  "GitHub",
+  "Fronteira da Paz",
+  "Colonia Express",
+  "Chuí/Chuy",
+  "Taim"
+ ],
+ "never_translate_to": {
+  "en": [
+   "metronome",
+   "agenda"
+  ],
+  "es": [
+   "Expedición Sur",
+   "piernas",
+   "golpe",
+   "trilhas"
+  ]
+ },
+ "terms": {
+  "A ida": {
+   "en": "The outbound trip",
+   "es": "La ida"
+  },
+  "A volta": {
+   "en": "The return trip",
+   "es": "La vuelta"
+  },
+  "Hua Hum: nosso plano e nossa aventura": {
+   "en": "Hua Hum: our plan and our adventure",
+   "es": "Hua Hum: nuestro plan y nuestra aventura"
+  },
+  "Nova viagem": {
+   "en": "New trip",
+   "es": "Nuevo viaje"
+  },
+  "Pronto / Manual / Fora do git": {
+   "en": "Done / Manual / Outside git",
+   "es": "Listo / Manual / Fuera de git"
+  },
+  "Um relógio só": {
+   "en": "A single clock",
+   "es": "Un solo reloj"
+  },
+  "a Defender (o carro)": {
+   "en": "the Defender",
+   "es": "la Defender"
+  },
+  "agenda (schedule do trip.js)": {
+   "en": "schedule",
+   "es": "agenda"
+  },
+  "balsa": {
+   "en": "ferry",
+   "es": "ferry"
+  },
+  "batida (da música)": {
+   "en": "beat",
+   "es": "beat"
+  },
+  "carimbo de fronteira": {
+   "en": "border stamp",
+   "es": "sello de frontera"
+  },
+  "carro": {
+   "en": "car",
+   "es": "auto"
+  },
+  "casado com a música": {
+   "en": "synced to the music",
+   "es": "sincronizado con la música"
+  },
+  "compasso (música)": {
+   "en": "bar",
+   "es": "compás"
+  },
+  "custo": {
+   "en": "cost",
+   "es": "costo"
+  },
+  "diário de bordo": {
+   "en": "logbook",
+   "es": "diario de a bordo"
+  },
+  "dom. público": {
+   "en": "public domain",
+   "es": "dominio público"
+  },
+  "folhas de contato": {
+   "en": "contact sheets",
+   "es": "hojas de contacto"
+  },
+  "fora do git": {
+   "en": "outside git",
+   "es": "fuera de git"
+  },
+  "largar (o carro larga)": {
+   "en": "set off",
+   "es": "arrancar"
+  },
+  "masters 60 fps": {
+   "en": "60 fps masters",
+   "es": "masters de 60 fps"
+  },
+  "motor de rota": {
+   "en": "route engine",
+   "es": "motor de ruta"
+  },
+  "o pampa": {
+   "en": "the pampas",
+   "es": "la pampa"
+  },
+  "parada": {
+   "en": "stop",
+   "es": "parada"
+  },
+  "passos do OSRM": {
+   "en": "OSRM steps",
+   "es": "pasos de OSRM"
+  },
+  "perna (trecho entre paradas)": {
+   "en": "leg",
+   "es": "tramo"
+  },
+  "rípio / ripio (estrada de cascalho)": {
+   "en": "gravel road",
+   "es": "ripio"
+  },
+  "trilha / trilha sonora (música)": {
+   "en": "soundtrack",
+   "es": "pista musical"
+  },
+  "trilhas do HyperFrames (data-start/data-duration)": {
+   "en": "HyperFrames tracks",
+   "es": "pistas de HyperFrames"
+  },
+  "trilho de altitude": {
+   "en": "altitude track",
+   "es": "riel de altitud"
+  },
+  "vídeo": {
+   "en": "video",
+   "es": "video"
+  }
+ }
+}
