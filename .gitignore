@@ -16,3 +16,6 @@
 node_modules/
 *.log
 stats_tokens.json
+**/data/fotos_raw/
+**/data/cars_raw2/
+**/src/

@@ -11,7 +11,7 @@ Feito com [HyperFrames](https://hyperframes.heygen.com) (HTML → vídeo) e Clau
 
 ## 📖 Guia de uso
 
-Guia completo (os 6 vídeos + como o motor de rota funciona + passo a passo): **https://inematds.github.io/expedicaosul/guia/**
+Guia completo (os 8 vídeos + como o motor de rota funciona + passo a passo): **https://inematds.github.io/expedicaosul/guia/**
 
 ---
 
@@ -73,6 +73,9 @@ saem da mesma função do tempo, então nada fica fora de sincronia.
 ```
 trajeto-hua-hum/        vídeo Hua Hum (motor v1, dois carros) + data/ (scripts e dados)
 trajeto-hua-hum-16x9/   variante 16:9
+huahum-real/            Hua Hum "nosso plano × nossa aventura": 3 quadros (mapa geral fixo, detalhado, fotos da viagem),
+                        agenda por carro com ida/volta; data/fotos.txt → build_fotos.py; make_16x9.py próprio
+huahum-real-16x9/       variante 16:9 (gerada por huahum-real/make_16x9.py)
 volta-defender/         motor genérico de rota longa + assets/trip.js da volta
 volta-defender-16x9/    variante 16:9 (assets por link simbólico)
 ida-defender/           mesmo motor + assets/trip.js da ida
@@ -80,7 +83,7 @@ ida-defender-16x9/
 make_16x9.py            gera a variante 16:9 trocando só os blocos de layout
 render_share.sh         render 60 fps + versão de compartilhar (-14 LUFS)
 tg_encode.sh            versão ≤ 44 MB (Telegram / web)
-videos/                 os 6 vídeos (versão web) + capas
+videos/                 os 8 vídeos (versão web) + capas
 FALHAS.md               changelog de falhas corrigidas
 ```
 

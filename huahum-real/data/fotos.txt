@@ -1,0 +1,55 @@
+# segundo | arquivo (em assets/) | legenda      — fotos da viagem 24/09/2026 (hora do EXIF)
+# arquivo fotos/NNN = índice na folha de contato (data/fotos_raw/sheet_*.jpg, ordem cronológica)
+# ===== NOSSO PLANO (fotos de referência, Wikimedia Commons) =====
+7.2   | photos/sma.jpg         | San Martín de los Andes
+10.8  | photos/lacar.jpg       | Lago Lácar
+14.4  | photos/ripio.jpg       | Alto da RP48
+18.0  | photos/yuco.jpg        | Playa de Yuco
+21.6  | photos/nonthue.jpg     | Lago Nonthué
+25.2  | photos/huahum.jpg      | Río Hua Hum
+28.8  | photos/border.jpg      | Paso Hua Hum
+32.4  | photos/pirehueico.jpg  | Lago Pirihueico · Chile
+# ===== NOSSA AVENTURA (fotos da viagem) =====
+38.4  | fotos/000.jpg | 12h08 · saída de San Martín
+45.6  | fotos/009.jpg | 12h12 · mirador sobre San Martín
+48.0  | fotos/008.jpg | 12h12 · a turma no mirador
+50.4  | fotos/004.jpg | 12h11 · a Defender no mirador
+52.8  | fotos/007.jpg | 12h11 · San Martín lá embaixo
+55.2  | fotos/017.jpg | 12h29 · rípio rumo aos Andes
+58.8  | fotos/021.jpg | 12h32 · parada na estrada
+62.4  | fotos/023.jpg | 12h32 · a Defender no rípio
+64.8  | fotos/026.jpg | 12h33 · Taos e Defender
+67.2  | fotos/029.jpg | 12h33 · neve nos picos
+69.6  | fotos/036.jpg | 13h02 · Yuco
+74.4  | fotos/041.jpg | 13h06 · margem do Lácar
+76.8  | fotos/047.jpg | 13h07 · a turma no Lácar
+79.2  | fotos/053.jpg | 13h07 · Lago Lácar
+81.6  | fotos/055.jpg | 13h08 · o Taos sobre o Lácar
+84.0  | fotos/057.jpg | 13h15 · o arroio transbordando
+88.8  | fotos/058.jpg | 13h21 · água e galhos na pista
+91.2  | fotos/060.jpg | 13h21 · polícia e resgate no bloqueio
+93.6  | fotos/061.jpg | 13h22 · brigadista no bloqueio
+98.4  | fotos/118.jpg | a travessia pela água
+105.6 | fotos/063.jpg | 13h46 · Hua Hum
+108.0 | fotos/074.jpg | 13h49 · o píer no lago
+110.4 | fotos/080.jpg | 13h50 · cauquén no lago
+112.8 | fotos/089.jpg | 13h51 · a Defender na beira do lago
+115.2 | fotos/095.jpg | 13h53 · periquitos nas árvores
+117.6 | fotos/102.jpg | 13h54 · selfie com a Defender
+120.0 | fotos/105.jpg | 13h59 · cavalos soltos
+122.4 | fotos/109.jpg | 14h01 · perto da fronteira
+127.2 | fotos/113.jpg | 14h02 · Paso Hua Hum · fechado
+129.6 | fotos/111.jpg | 14h01 · os vizinhos da fronteira
+132.0 | fotos/112.jpg | 14h02 · cavalos no posto
+134.4 | fotos/116.jpg | 14h57 · voltando pela RP48
+139.2 | fotos/117.jpg | 15h01 · de volta à curva alagada
+141.6 | fotos/119.jpg | 15h01 · carros cruzando a água
+144.0 | fotos/122.jpg | 15h02 · máquinas liberando a pista
+146.4 | fotos/128.jpg | 15h30 · a Defender no rípio
+148.8 | fotos/129.jpg | 15h30 · neve e rípio
+151.2 | fotos/132.jpg | 15h30 · barro na Defender
+153.6 | fotos/139.jpg | 15h43 · corrida na estrada
+156.0 | fotos/149.jpg | 15h44 · corrida na estrada
+158.4 | fotos/157.jpg | 15h45 · todo mundo a bordo
+161.4 | fotos/167.jpg | 16h03 · San Martín de los Andes
+164.0 | fotos/168.jpg | 16h09 · de volta a San Martín
